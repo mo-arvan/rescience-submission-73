@@ -19,29 +19,32 @@ class BEBLP_Agent:
         self.gamma = gamma
         self.beta=beta
         
-        self.R = defaultdict(lambda: defaultdict(lambda: 0.0)) #Récompenses
-        self.tSAS = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0))) #Transitions
+        height,width,len_action=self.environment.height,self.environment.width,len(self.environment.actions)
+        self.R = np.zeros((height,width,len_action)) #Récompenses
+        self.tSAS = np.zeros((height,width,len_action,height,width)) #Transitions
         
-        self.nSA = defaultdict(lambda: defaultdict(lambda: 0)) #Compteur passage (état,action)
-        self.nSAS = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0))) #Compteur (état_1,action,état_2)
-        self.last_k=defaultdict(lambda: defaultdict(lambda: [(0,0)]*self.step_update))
-        self.Q = defaultdict(lambda: defaultdict(lambda: 0.0)) #Q-valeur état-action
-        self.bonus=defaultdict(lambda: defaultdict(lambda: 0.0))
+        self.nSA = np.zeros((height,width,len_action)) #Compteur passage (état,action)
+        self.nSAS = np.zeros((height,width,len_action,height,width)) #Compteur (état_1,action,état_2)
+
+        self.Q = np.zeros((height,width,len_action)) #Q-valeur état-action
+        self.bonus=np.zeros((height,width,len_action))
         
         self.counter=self.nSA #Compteur (état,action)
         self.step_counter=0
         
-        self.prior= defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
+        self.prior= np.zeros((height,width,len_action,height,width))
+        self.prior_0=np.zeros((height,width,len_action))
         
-        self.tSAS_old=defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
-        self.nSAS_old = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
+        self.tSAS_old=np.zeros((height,width,len_action,height,width))
+        self.nSAS_old = np.zeros((height,width,len_action,height,width))
         
-        self.LP=defaultdict(lambda: defaultdict(lambda: 0.0))
+        self.LP=np.zeros((height,width,len_action))
         self.step_update=step_update
         self.alpha=alpha
         
+        self.last_k=np.zeros((height,width,len_action,self.step_update))
         self.coeff_prior=coeff_prior
-        self.known_state_action=[]
+
         self.ajout_states()
         
     def learn(self,old_state,reward,new_state,action):
@@ -73,6 +76,11 @@ class BEBLP_Agent:
             old_CV,old_variance=self.cross_validation(new_dict_nSAS,new_dict_prior)
             self.LP[old_state][action]=max(old_CV-new_CV+self.alpha*np.sqrt(new_variance),0.001)
             self.bonus[old_state][action]=self.beta/(1+1/np.sqrt(self.LP[old_state][action]))
+            """if old_state==(0,0) and action==1:
+                print(old_CV,new_CV,new_variance)
+                print(self.LP[old_state][action],self.bonus[old_state][action])
+                print("")
+            """
         
             delta=1
             while delta > 1e-3 :
@@ -81,9 +89,9 @@ class BEBLP_Agent:
                     for taken_action in self.nSA[visited_state]:
                         value_action=self.Q[visited_state][taken_action]
                         self.Q[visited_state][taken_action]=self.R[visited_state][taken_action]+self.bonus[visited_state][taken_action]+self.gamma*np.sum([max(self.Q[next_state].values())*self.tSAS[visited_state][taken_action][next_state] for next_state in self.tSAS[visited_state][taken_action]])
-                        delta=max(delta,np.abs(value_action-self.Q[visited_state][taken_action]))
+                        delta=max(delta,np.abs(value_action-self.Q[visited_state][taken_action]))     
 
-    def choose_action(self): #argmax pour choisir l'action 
+    def choose_action(self): #argmax pour choisir l'action
         self.step_counter+=1
         state=self.environment.current_location
         

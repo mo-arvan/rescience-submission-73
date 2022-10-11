@@ -1,98 +1,58 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pygame
 import time
-import pandas as pd
 import random
 
-from Gridworld import State
 from Useful_functions import play
-from Useful_functions import plot3D, plot4D,convergence,save_pickle, open_pickle,value_iteration,policy_evaluation
-from Complexworld import ComplexState
-from Deterministic_world import Deterministic_State
-from Uncertain_world import Uncertain_State
-from Two_step_task import Two_step
+from Useful_functions import plot3D,convergence,save_pickle, open_pickle,value_iteration,policy_evaluation
+
+
 from Lopesworld import Lopes_State
-from Lopes_nonstat import Lopes_nostat
-from Deterministic_nostat import Deterministic_no_stat
-from Uncertainworld_U import Uncertain_State_U
-from Uncertainworld_B import Uncertain_State_B
+from Lopes_no_stat import Lopes_nostat
 
 
-from Q_learning import Q_Agent
-from Kalman import Kalman_agent
-from Kalman_sum import Kalman_agent_sum
 from Rmax import Rmax_Agent
 from BEB import BEB_Agent
-from KalmanMB import KalmanMB_Agent
-from greedyMB import QMB_Agent
+from greedyMB import Epsilon_MB_Agent
 from BEBLP import BEBLP_Agent
 from RmaxLP import RmaxLP_Agent
-from PIM import PIM_Agent
-from PEI_E import PEI_E_Agent
-from PEI_KL import PEI_KL_Agent
-from PEI_DE import PEI_DE_Agent
 
 #Initializing parameters
-environments_parameters={'Two_Step':{},'Lopes':{'transitions':np.load('Mondes/Transitions_Lopes.npy',allow_pickle=True)}}
-all_environments={'Lopes':Lopes_State,'Two_Step':Two_step}
+environments_parameters={}
+all_environments={}
 for number_world in range(1,21):
-    world=np.load('Mondes/World_'+str(number_world)+'.npy')
-    world_2=np.load('Mondes/World_'+str(number_world)+'_B.npy')
-    transitions=np.load('Mondes/Transitions_'+str(number_world)+'.npy',allow_pickle=True)
-    transitions_U=np.load('Mondes/Transitions_'+str(number_world)+'_U.npy',allow_pickle=True)
-    transitions_B=np.load('Mondes/Transitions_'+str(number_world)+'_B.npy',allow_pickle=True)
-    transitions_lopes=np.load('Mondes/Transitions_Lopes_non_stat'+str(number_world)+'.npy',allow_pickle=True)
+    transitions_lopes=np.load('Mondes/Transitions_Lopes_no_stat '+str(number_world)+'.npy',allow_pickle=True)
     transitions_lopes_i_variable=np.load('Mondes/Transitions_Lopes_'+str(number_world)+'.npy',allow_pickle=True)
-    transitions_lopes_optimal=np.load('Mondes/Transitions_Lopes_non_stat_optimal'+str(number_world)+'.npy',allow_pickle=True)
-    environments_parameters["D_{0}".format(number_world)] = {'world':world}
-    environments_parameters["U_{0}".format(number_world)] = {'world':world,'transitions':transitions}
-    environments_parameters["DB_{0}".format(number_world)] = {'world':world,'world2':world_2}
-    environments_parameters["UU_{0}".format(number_world)] = {'world':world,'transitions':transitions,'transitions_U':transitions_U}
-    environments_parameters["UB_{0}".format(number_world)] = {'world':world,'world2':world_2,'transitions':transitions,'transitions_B':transitions_B} 
-    environments_parameters["Lopes_nostat_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable,'transitions2':transitions_lopes}
-    environments_parameters["Lopes_nostat_optimal_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable,'transitions2':transitions_lopes_optimal}
     environments_parameters["Lopes_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable}
-    all_environments["D_{0}".format(number_world)]=Deterministic_State
-    all_environments["U_{0}".format(number_world)]=Uncertain_State
-    all_environments["DB_{0}".format(number_world)]=Deterministic_no_stat
-    all_environments["UB_{0}".format(number_world)]=Uncertain_State_B
-    all_environments["UU_{0}".format(number_world)]=Uncertain_State_U
+    
+    environments_parameters["Lopes_nostat_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable,'transitions_no_stat':transitions_lopes}
+    environments_parameters["Lopes_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable}
     all_environments["Lopes_nostat_{0}".format(number_world)]=Lopes_nostat
-    all_environments["Lopes_nostat_optimal_{0}".format(number_world)]=Lopes_nostat
     all_environments["Lopes_{0}".format(number_world)]=Lopes_State
 
-seed=57
+seed=173
 np.random.seed(seed)
-random.seed(57)
-agent_parameters={Q_Agent:{'alpha':0.5,'beta':0.05,'gamma':0.95,'exploration':'softmax'},
-            Kalman_agent_sum:{'gamma':0.98,'variance_ob':1,'variance_tr':50,'curiosity_factor':1},
-            Kalman_agent:{'gamma':0.95, 'variance_ob':1,'variance_tr':40},
-            KalmanMB_Agent:{'gamma':0.95,'H_update':3,'entropy_factor':0.1,'epis_factor':50,'alpha':0.2,'gamma_epis':0.5,'variance_ob':0.02,'variance_tr':0.5,'known_states':True},
-            QMB_Agent:{'gamma':0.95,'epsilon':0.2,'known_states':True},
+random.seed(seed)
+agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.1},
             Rmax_Agent:{'gamma':0.95, 'm':7,'Rmax':1,'known_states':True,'u_m':7},
             BEB_Agent:{'gamma':0.95,'beta':3,'known_states':True,'coeff_prior':0.001,'informative':False},
             BEBLP_Agent:{'gamma':0.95,'beta':3,'step_update':5,'coeff_prior':0.001,'alpha':0.3},
-            RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'alpha':0.6,'m':2.6},
-            PIM_Agent:{'gamma':0.95, 'beta':1.5, 'alpha':1.5, 'k':2},
-            PEI_E_Agent:{'gamma':0.95,'gamma_e':0.5,'coeff_e':2,'epsilon':0.1},
-            PEI_KL_Agent:{'gamma':0.95,'gamma_kl':0.7,'coeff_kl':1,'epsilon':0.1,'step_update':5},
-            PEI_DE_Agent:{'gamma':0.95,'gamma_de':0.2,'coeff_de':1,'epsilon':0.1,'step_update':5}}
+            RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'alpha':0.6,'m':2.6},}
 
 
 nb_iters=1
-trials = 125
-max_step =40
+trials = 100
+max_step =30
 photos=[10,20,30]
 screen=0
-accuracy=0.001
+accuracy=0.01
 pas_VI=50
 
-#agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'QMB':QMB_Agent,'KMB':KalmanMB_Agent,'PIM':PIM_Agent,'QA':Q_Agent,'KAS':Kalman_agent_sum}
+#agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
 agents={'BEBLP':BEBLP_Agent}
-#environments=['Lopes_{0}'.format(num) for num in range(1,21)]+['Lopes_nostat_{0}'.format(num) for num in range(1,21)]+['D_{0}'.format(num) for num in range(1,21)]+['U_{0}'.format(num) for num in range(1,21)]+['UB_{0}'.format(num) for num in range(1,21)]
+#environments=['Lopes_{0}'.format(num) for num in range(1,21)]+['Lopes_nostat_{0}'.format(num) for num in range(1,21)]
 
-names_env = ['U_1']
+names_env = ['Lopes_nostat_1']
     
 rewards={(name_agent,name_environment):[] for name_agent in agents.keys() for name_environment in names_env}
 steps={(name_agent,name_environment):[] for name_agent in agents.keys() for name_environment in names_env}
@@ -175,11 +135,11 @@ std_rewards_agent={name_agent: np.std(np.array([rewards[name_agent,name_environm
 
     
 
-rename={'RA':'R-max','BEB':'BEB','BEBLP':'ζ-EB','RALP':'ζ-R-max','QMB':'Ɛ-greedy','KMB':'KMB','PIM':'PIM','PEI_E':'PEI_E','PEI_KL':'PEI_KL','PEI_DE':'PEI_DE'}
-colors={'RA':'royalblue','RALP':'royalblue','QMB':'red','BEB':'black','BEBLP':'black','KMB':'green','PIM':'tab:purple','PEI_E':'green','PEI_KL':'tab:orange','PEI_DE':'tab:brown'}
-markers={'RA':'^','RALP':'o','BEB':'x','BEBLP':'*','QMB':'s','KMB':'P','PIM':'D','PEI_E':'o','PEI_KL':'.','PEI_DE':'^'}
-linewidths={'RA':'0.75','RALP':'1.25','BEB':'0.75','BEBLP':'1.25','QMB':'0.75','KMB':'1','PIM':'1','PEI_E':'1','PEI_KL':'1','PEI_DE':'1'}
-marker_sizes={'RA':'3','RALP':'3','BEB':'3','BEBLP':'3','QMB':'3','KMB':'3','PIM':'3','PEI_E':'3','PEI_KL':'3','PEI_DE':'3'}
+rename={'RA':'R-max','BEB':'BEB','BEBLP':'ζ-EB','RALP':'ζ-R-max','Epsilon_MB':'Ɛ-greedy'}
+colors={'RA':'royalblue','RALP':'royalblue','Epsilon_MB':'red','BEB':'black','BEBLP':'black'}
+markers={'RA':'^','RALP':'o','BEB':'x','BEBLP':'*','Epsilon_MB':'s'}
+linewidths={'RA':'0.75','RALP':'1.25','BEB':'0.75','BEBLP':'1.25','Epsilon_MB':'0.75'}
+marker_sizes={'RA':'3','RALP':'3','BEB':'3','BEBLP':'3','Epsilon_MB':'3'}
 
 fig=plt.figure(dpi=300)
 ax = fig.add_subplot(1, 1, 1)
