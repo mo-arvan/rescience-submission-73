@@ -38,7 +38,7 @@ class Epsilon_MB_Agent:
                         self.tSAS[old_state][action][next_state] = self.nSAS[old_state][action][next_state]/self.nSA[old_state][action]
                     
                     delta=1
-                    while delta > 1e-3 :
+                    while delta > 1e-2 :
                         delta=0
                         for visited_state in self.nSA:
                             for taken_action in self.nSA[visited_state]:
