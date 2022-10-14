@@ -34,10 +34,10 @@ seed=173
 np.random.seed(seed)
 random.seed(seed)
 agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.1},
-            Rmax_Agent:{'gamma':0.95, 'm':7,'Rmax':1,'known_states':True,'u_m':13},
-            BEB_Agent:{'gamma':0.95,'beta':3,'known_states':True,'coeff_prior':0.001,'informative':False},
+            Rmax_Agent:{'gamma':0.95, 'm':6,'Rmax':1,'u_m':10,'correct_prior':True},
+            BEB_Agent:{'gamma':0.95,'beta':3,'correct_prior':True,'coeff_prior':0.001,'informative':False},
             BEBLP_Agent:{'gamma':0.95,'beta':2.4,'step_update':5,'coeff_prior':0.001,'alpha':0.4},
-            RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'alpha':0.6,'m':2.6},}
+            RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'alpha':0.3,'m':1.5},}
 
 
 nb_iters=1
@@ -49,10 +49,10 @@ accuracy=0.01
 pas_VI=50
 
 #agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
-agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
+agents={'RALP':RmaxLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
 #environments=['Lopes_{0}'.format(num) for num in range(1,21)]+['Lopes_nostat_{0}'.format(num) for num in range(1,21)]
 
-names_env = ['Lopes_{0}'.format(num) for num in range(3,8)]
+names_env = ['Lopes_{0}'.format(num) for num in range(1,3)]
     
 rewards={(name_agent,name_environment):[] for name_agent in agents.keys() for name_environment in names_env}
 steps={(name_agent,name_environment):[] for name_agent in agents.keys() for name_environment in names_env}

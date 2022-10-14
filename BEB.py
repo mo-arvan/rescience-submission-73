@@ -14,13 +14,14 @@ def count_to_dirichlet(dictionnaire):
 
 class BEB_Agent:
 
-    def __init__(self,environment, gamma=0.95, beta=1,known_states=True,coeff_prior=0.01,informative=True):
+    def __init__(self,environment, gamma=0.95, beta=1,coeff_prior=0.01,informative=True,correct_prior=True):
         
         self.environment=environment
         self.gamma = gamma
         self.beta=beta
         
-        self.R = defaultdict(lambda: defaultdict(lambda: 0.0)) #Récompenses
+        self.R = defaultdict(lambda: defaultdict(lambda: 0.0))
+        self.Rsum = defaultdict(lambda: defaultdict(lambda: 0.0))#Récompenses
         self.tSAS = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0))) #Transitions
         
         self.nSA = defaultdict(lambda: defaultdict(lambda: 0.0)) #Compteur passage (état,action)
@@ -33,7 +34,7 @@ class BEB_Agent:
         self.counter=self.nSA #Compteur (état,action)
         self.step_counter=0
         
-        self.known_states=known_states
+        self.correct_prior=correct_prior
         
         self.prior=defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
         self.prior_0=defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
@@ -42,15 +43,14 @@ class BEB_Agent:
         self.informative=informative
         
         
-        if self.known_states: self.ajout_states()
+        self.ajout_states()
     
     def learn(self,old_state,reward,new_state,action):
                     
-        self.uncountered_state(new_state) #Si l'état est nouveau, création des q-valeurs pour les actions possibles
-                    
         self.nSA[old_state][action] +=1
         self.nSAS[old_state][action][new_state] += 1
-        self.R[old_state][action]=reward
+        self.Rsum[old_state][action]+=reward
+        self.R[old_state][action]=self.Rsum[old_state][action]/self.nSA[old_state][action]
         self.prior[old_state][action][new_state]+=1
         self.prior_0[old_state][action]+=1
         #Modifier les probabilités de transition selon le prior avec distribution de dirichlet
@@ -73,19 +73,10 @@ class BEB_Agent:
     def choose_action(self): #argmax pour choisir l'action
         self.step_counter+=1
         state=self.environment.current_location
-        self.uncountered_state(state)
         q_values = self.Q[state]
         maxValue = max(q_values.values())
         action = np.random.choice([k for k, v in q_values.items() if v == maxValue])
         return action
-    
-    
-    def uncountered_state(self,state): #création des q-valeurs pour les actions possibles pour les nouveaux états
-        known_states=self.prior.keys()
-        if state not in known_states:
-            for move in self.environment.actions:
-                self.bonus[state][move]=self.beta
-                self.Q[state][move]=(1+self.beta)/(1-self.gamma)
     
     def ajout_states(self):
         self.states=self.environment.states
@@ -108,8 +99,10 @@ class BEB_Agent:
                 self.Q[state_1][action]=(1+self.beta)/(1-self.gamma)
                 for state_2 in self.states:
                     self.tSAS[state_1][action][state_2]=1/len(self.states)
-        #Below is the wrong prior version
-        """max_prior=0
+        if not self.correct_prior: self.wrong_prior
+        
+    def wrong_prior(self):
+        max_prior=0
         for state_1 in self.states:
             for action in self.environment.actions:
                 for state_2 in self.states:
@@ -118,4 +111,4 @@ class BEB_Agent:
             for action in self.environment.actions:
                 for state_2 in self.states:
                     self.prior[state_1][action][state_2]=np.random.uniform(self.coeff_prior*1e-5,max_prior)
-                self.prior_0[state_1][action]=sum(self.prior[state_1][action].values())"""
+                self.prior_0[state_1][action]=sum(self.prior[state_1][action].values())

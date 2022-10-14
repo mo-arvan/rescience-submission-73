@@ -12,6 +12,7 @@ class RmaxLP_Agent:
         self.gamma = gamma  
         
         self.R = defaultdict(lambda: defaultdict(lambda: 0.0))
+        self.Rsum = defaultdict(lambda: defaultdict(lambda: 0.0))
         
         self.nSA = defaultdict(lambda: defaultdict(lambda: 0))
         self.nSAS = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0)))
@@ -38,36 +39,18 @@ class RmaxLP_Agent:
                     
                     self.nSA[old_state][action] +=1
                     self.nSAS[old_state][action][new_state] += 1
+                    self.Rsum[old_state][action]+=reward
+                    
                     self.last_k[old_state][action][self.nSA[old_state][action]%self.step_update]=new_state
-                    self.tSAS[old_state][action]=defaultdict(lambda:.0)                      
+                    self.tSAS[old_state][action]=defaultdict(lambda:.0) 
+                     
                     for next_state in self.nSAS[old_state][action].keys():
                         self.tSAS[old_state][action][next_state] = self.nSAS[old_state][action][next_state]/self.nSA[old_state][action]
                     
                     if self.LP[old_state][action] < self.m :
-                        self.R[old_state][action]=reward
+                        self.R[old_state][action]=self.Rsum[old_state][action]/self.nSA[old_state][action]
                     else : self.R[old_state][action]=self.Rmax
                     
-                    """
-                    if self.LP[old_state][action] < self.m :
-                        if (old_state,action) not in self.known_state_action :
-                            self.last_model_update=self.step_counter
-                            self.R[old_state][action]=self.Rsum[old_state][action]/self.nSA[old_state][action] 
-                            self.known_state_action.append((old_state,action))
-                            self.tSAS[old_state][action]=defaultdict(lambda:.0)                      
-                            for next_state in self.nSAS[old_state][action].keys():
-                                self.tSAS[old_state][action][next_state] = self.nSAS[old_state][action][next_state]/self.nSA[old_state][action]
-                            for j in range(self.VI): #cf formule logarithme Strehl 2009 PAC Analysis
-                                for state_known,action_known in self.known_state_action:
-                                    self.Q[state_known][action_known]=self.R[state_known][action_known]+self.gamma*np.sum([max(self.Q[next_state].values())*self.tSAS[state_known][action_known][next_state] for next_state in self.tSAS[state_known][action_known].keys()])
-                    else : 
-                        self.R[old_state][action]=self.Rmax      
-                        if (old_state,action) in self.known_state_action: self.known_state_action.remove((old_state,action))
-                    """
-
-                    
-                    """if self.nSA[old_state][action]<self.step_update:
-                        new_CV,new_variance=self.cross_validation(self.nSAS[old_state][action])
-                        self.LP[old_state][action]=new_CV+self.alpha*np.sqrt(new_variance)"""
                     
                     if self.nSA[old_state][action]>self.step_update:
                         new_dict={}
