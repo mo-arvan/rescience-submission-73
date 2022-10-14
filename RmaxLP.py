@@ -95,20 +95,6 @@ class RmaxLP_Agent:
                     self.tSAS[state_1][action][state_2]=1/number_states
     
     def cross_validation(self,nSAS_SA):
-        """cv,v=0,[]
-        for next_state,next_state_count in nSAS_SA.items():
-            value=(next_state_count-1)/sum(nSAS_SA.values())
-            if value ==0: log_value=-1
-            else: log_value=np.log(value)
-            cv-=next_state_count*log_value
-            v+=[-log_value]*next_state_count
-        v=np.array(v)
-        cardinal=sum(nSAS_SA.values())
-        cross_validation =cv/cardinal
-        var=(v-cross_validation)**2
-        variance_cv=np.sum(var)/cardinal
-        return cross_validation,variance_cv
-        """
         cv,v=0,[]
         prior=0.04
         sum_count=sum(nSAS_SA.values())

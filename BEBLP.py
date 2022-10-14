@@ -19,6 +19,7 @@ class BEBLP_Agent:
         self.gamma = gamma
         self.beta=beta
         
+        self.Rsum=defaultdict(lambda: defaultdict(lambda: 0.0))
         self.R = defaultdict(lambda: defaultdict(lambda: 0.0)) #Récompenses
         self.tSAS = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0))) #Transitions
         
@@ -49,18 +50,14 @@ class BEBLP_Agent:
                                         
         self.nSA[old_state][action] +=1
         self.nSAS[old_state][action][new_state] += 1
-        self.R[old_state][action]=reward
+        self.Rsum[old_state][action]+=reward
+        self.R[old_state][action]=self.Rsum[old_state][action]/self.nSA[old_state][action]
         self.prior[old_state][action][new_state]+=1  
         
         #Modifier les probabilités de transition selon le prior avec distribution de dirichlet
         self.tSAS[old_state][action]=count_to_dirichlet(self.prior[old_state][action])
         self.last_k[old_state][action][self.nSA[old_state][action]%self.step_update]=new_state
 
-
-        """if self.nSA[old_state][action]<self.step_update:
-            new_CV,new_variance=self.cross_validation(self.nSAS[old_state][action],self.prior[old_state][action])
-            self.LP[old_state][action]=max(new_CV+self.alpha*np.sqrt(new_variance),0.001)
-            self.bonus[old_state][action]=self.beta/(1+1/np.sqrt(self.LP[old_state][action]))"""
         
         
         if self.nSA[old_state][action]>self.step_update:
@@ -125,73 +122,3 @@ class BEBLP_Agent:
         v=(v-cross_val)**2
         variance_cv=np.sum(v)/cardinal
         return cross_val,variance_cv
-
-
-        """
-        cv,v=0,[]
-        prior=self.coeff_prior
-        sum_count=sum(nSAS_SA.values())
-        print(nSAS_SA.values())
-        sum_prior=sum_count + len(self.environment.states)*prior
-        print(sum_prior)
-        for next_state,next_state_count in nSAS_SA.items():
-            if next_state_count-1==0:
-                log_value=np.log(prior/(sum_prior-1))
-            else :
-                value=((next_state_count-1)+prior)/(sum_prior-1)
-                log_value=np.log(value)
-            cv-=next_state_count*log_value
-            v+=[-log_value]*next_state_count
-        v=np.array(v)
-        cross_validation =cv/sum_count
-        var=(v-cross_validation)**2
-        variance_cv=np.sum(var)/sum_count
-        print(cross_validation,variance_cv)
-        print("")
-        return cross_validation,variance_cv"""
-    
-    
-        """cv,v=0,[]
-        for next_state,next_state_count in nSAS_SA.items():
-            prior_SA[next_state]-=1
-            for i in range(next_state_count):
-                values=count_to_dirichlet(prior_SA)
-                if values[next_state]<1e-10:
-                    values[next_state]=1e-10
-                cv-=np.log(values[next_state])
-                v.append(-np.log(values[next_state]))
-            prior_SA[next_state]+=1
-        v=np.array(v)
-        cardinal=sum(nSAS_SA.values())
-        cross_val =cv/cardinal
-        v=(v-cross_val)**2
-        variance_cv=np.sum(v)/cardinal
-        return cross_val,max(variance_cv,1)"""
-    
-        """cv,v=0,[]
-        for next_state,next_state_count in prior.items():
-            if next_state_count>1:
-                value=(next_state_count-1)/sum(prior.values())
-                if value ==0: log_value=-2
-                else: log_value=np.log(value)
-                cv-=next_state_count*log_value
-                v+=[-log_value]*int(next_state_count)
-        v=np.array(v)
-        cardinal=sum(nSAS_SA.values())
-        cross_validation =cv/cardinal
-        var=(v-cross_validation)**2
-        variance_cv=np.sum(var)/cardinal
-        return cross_validation,variance_cv"""
-        """cv,v=0,[]
-        for next_state,next_state_count in nSAS_SA.items():
-            value=(next_state_count-1)/sum(nSAS_SA.values())
-            if value ==0: log_value=-2
-            else: log_value=np.log(value)
-            cv-=next_state_count*log_value
-            v+=[-log_value]*next_state_count
-        v=np.array(v)
-        cardinal=sum(nSAS_SA.values())
-        cross_validation =cv/cardinal
-        var=(v-cross_validation)**2
-        variance_cv=np.sum(var)/cardinal
-        return cross_validation,variance_cv"""
