@@ -4,7 +4,7 @@ import time
 import random
 
 from Useful_functions import play
-from Useful_functions import plot3D,convergence,save_pickle, open_pickle,value_iteration,policy_evaluation
+from Useful_functions import plot3D,convergence,save_pickle, open_pickle,value_iteration,policy_evaluation, loading_environments
 
 
 from Lopesworld import Lopes_State
@@ -18,22 +18,12 @@ from BEBLP import BEBLP_Agent
 from RmaxLP import RmaxLP_Agent
 
 #Initializing parameters
-environments_parameters={}
-all_environments={}
-for number_world in range(1,21):
-    transitions_lopes=np.load('Mondes/Transitions_Lopes_no_stat '+str(number_world)+'.npy',allow_pickle=True)
-    transitions_lopes_i_variable=np.load('Mondes/Transitions_Lopes_'+str(number_world)+'.npy',allow_pickle=True)
-    environments_parameters["Lopes_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable}
-    
-    environments_parameters["Lopes_nostat_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable,'transitions_no_stat':transitions_lopes}
-    environments_parameters["Lopes_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable}
-    all_environments["Lopes_nostat_{0}".format(number_world)]=Lopes_nostat
-    all_environments["Lopes_{0}".format(number_world)]=Lopes_State
 
+all_environments,environments_parameters=loading_environments()
 seed=173
 np.random.seed(seed)
 random.seed(seed)
-agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.1},
+agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.3},
             Rmax_Agent:{'gamma':0.95, 'm':6,'Rmax':1,'u_m':12,'correct_prior':True},
             BEB_Agent:{'gamma':0.95,'beta':3,'correct_prior':True,'coeff_prior':0.001,'informative':False},
             BEBLP_Agent:{'gamma':0.95,'beta':2.4,'step_update':10,'coeff_prior':0.001,'alpha':0.4},
@@ -49,10 +39,10 @@ accuracy=0.01
 pas_VI=50
 
 #agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
-agents={'RALP':RmaxLP_Agent,'Epsilon_MB':Epsilon_MB_Agent,'RA':Rmax_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent}
+agents={'Epsilon_MB':Epsilon_MB_Agent}
 #environments=['Lopes_{0}'.format(num) for num in range(1,21)]+['Lopes_nostat_{0}'.format(num) for num in range(1,21)]
 
-names_env = ['Lopes_nostat_{0}'.format(num) for num in range(4,6)]
+names_env = ['Lopes_{0}'.format(num) for num in range(1,6)]
     
 rewards={(name_agent,name_environment):[] for name_agent in agents.keys() for name_environment in names_env}
 steps={(name_agent,name_environment):[] for name_agent in agents.keys() for name_environment in names_env}

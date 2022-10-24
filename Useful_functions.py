@@ -52,18 +52,18 @@ def play(environment, agent, trials=200, max_step=500, screen=0,photos=[10,20,50
     return reward_per_episode,step_number,policy_value_error
 
 def loading_environments():
-    environments_parameters={'Lopes':{'transitions':np.load('Mondes/Transitions_Lopes.npy',allow_pickle=True)}}
-    all_environments={'Lopes':Lopes_State}
+    environments_parameters={}
+    all_environments={}
     for number_world in range(1,21):
-        transitions_lopes=np.load('Mondes/Transitions_Lopes_non_stat'+str(number_world)+'.npy',allow_pickle=True)
+        transitions_lopes=np.load('Mondes/Transitions_Lopes_no_stat '+str(number_world)+'.npy',allow_pickle=True)
         transitions_lopes_i_variable=np.load('Mondes/Transitions_Lopes_'+str(number_world)+'.npy',allow_pickle=True)
-        transitions_lopes_optimal=np.load('Mondes/Transitions_Lopes_non_stat_optimal'+str(number_world)+'.npy',allow_pickle=True)
-        environments_parameters["Lopes_nostat_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable,'transitions2':transitions_lopes}
-        environments_parameters["Lopes_nostat_optimal_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable,'transitions2':transitions_lopes_optimal}
+        environments_parameters["Lopes_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable}
+        
+        environments_parameters["Lopes_nostat_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable,'transitions_no_stat':transitions_lopes}
         environments_parameters["Lopes_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable}
         all_environments["Lopes_nostat_{0}".format(number_world)]=Lopes_nostat
-        all_environments["Lopes_nostat_optimal_{0}".format(number_world)]=Lopes_nostat
         all_environments["Lopes_{0}".format(number_world)]=Lopes_State
+    return all_environments,environments_parameters
 
 ### PICTURES ###
 
