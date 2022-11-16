@@ -1,8 +1,1 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Nov 16 17:13:43 2022
-
-@author: gus
-"""
-
+This code aims to partially replicate the results obtained by Lopes, Lang, Toussaint and Oudeyer (2012).
