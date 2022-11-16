@@ -1,17 +1,9 @@
 import numpy as np 
-import time
-import pygame
-def create_matrix(width,height,liste):
-    return [[liste for i in range(width)] for j in range(height)]
-import random
-from Representation import Monde
-from Representation import Transition
-from Lopesworld import Lopes_State
-import copy
 
-UP,DOWN,LEFT,RIGHT,STAY=0,1,2,3,4
-np.random.seed(173)
-random.seed(173)            
+
+from Lopesworld import Lopes_State
+
+UP,DOWN,LEFT,RIGHT,STAY=0,1,2,3,4         
 #Generate transitions of the worlds used in the article
 
 def transition_Lopes():
@@ -66,7 +58,7 @@ def non_stat_Lopes_article(world_number=1):
             for k in range(5):
                 if liste_rotation[k]==k:
                     valid=False
-                    random.shuffle(liste_rotation)
+                    np.random.shuffle(liste_rotation)
                     break
         new_transitions=[transitions[rotation][state_to_change[0]][state_to_change[1]] for rotation in liste_rotation]
         for action in range(5):
@@ -77,31 +69,30 @@ def non_stat_Lopes_article(world_number=1):
 from policy_Functions import value_iteration
 
 #Use only worlds in which the optimal path corresponds to the one in the article    
-def valid_Lopes():
+def valid_Lopes(malus=-0.1):
     for count in range(200):
         transitions=np.array(transition_Lopes())
-        environment=Lopes_State(transitions)
+        environment=Lopes_State(transitions,malus)
         _,policy=value_iteration(environment,0.95,0.01)
         if policy[0,0]==1 and policy[1,0]==1 and policy[2,0]==1 and policy[3,0]==3 and policy[3,1]==3 and policy[3,2]==3 and policy[3,3]==3 :
             return transitions
             
-def proportion_valid_Lopes():
+def proportion_valid_Lopes(malus=-0.1):
     count=0
     iteration=1000
     for i in range(iteration):
         if i%100==0: print(i)
         transitions=np.array(transition_Lopes())
-        environment=Lopes_State(transitions)
+        environment=Lopes_State(transitions,malus)
         _,policy=value_iteration(environment,0.95,0.01)
         if policy[0,0]==1 and policy[1,0]==1 and policy[2,0]==1 and policy[3,0]==3 and policy[3,1]==3 and policy[3,2]==3 and policy[3,3]==3 and policy[3,4]==0 :
             count+=1
     print(count/iteration)
 
-def generer_20_Lopes_valid(): 
+def generer_20_Lopes_valid(malus): 
     for i in range(1,21):
-        transitions=valid_Lopes()
+        transitions=valid_Lopes(malus)
         np.save('Mondes/Transitions_Lopes_'+str(i)+'.npy',transitions)
         non_stat_Lopes_article(i)
-        
         
         

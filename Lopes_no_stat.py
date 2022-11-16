@@ -1,12 +1,14 @@
 import numpy as np
-import random
 
 UP,DOWN,LEFT,RIGHT,STAY=0,1,2,3,4
 
 def choice_dictionary(dictionary):
     keys = list(dictionary.keys())
     values = list(dictionary.values())
-    return random.choices(keys, weights=values)[0]
+    chosen_index = [number for number in range(len(keys))]
+    chosen_index=np.random.choice(chosen_index,1, p=values)[0]
+    print(chosen_index,values)
+    return keys[chosen_index]
 
 class Lopes_nostat():
     def __init__(self,transitions,transitions_no_stat):
