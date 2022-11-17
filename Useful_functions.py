@@ -59,17 +59,16 @@ def loading_environments():
     for number_non_stationarity in range(1,21):
         transitions_non_stat_article=np.load('Mondes/Transitions_non_stat_article-0.1_1_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
         transitions_strong_non_stat=np.load('Mondes/Transitions_strong_non_stat_-0.1_1_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
-        environments_parameters["Lopes_non_stat_article_{0}_-0.1".format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_0_1,'transitions_after_change':transitions_non_stat_article}
-        environments_parameters["Lopes_strong_non_stat_{0}_-0.1".format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_0_1,'transitions_after_change':transitions_strong_non_stat}
+        environments_parameters["Lopes_non_stat_article_-0.1_{0}".format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_0_1,'transitions_after_change':transitions_non_stat_article}
+        environments_parameters["Lopes_strong_non_stat_-0.1_{0}".format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_0_1,'transitions_after_change':transitions_strong_non_stat}
     for number_world in range(1,11):
+        transitions_lopes=np.load('Mondes/Transitions_Lopes_-1_'+str(number_world)+'.npy',allow_pickle=True)
         for number_non_stationarity in range(1,11):
             transitions_non_stat_article=np.load('Mondes/Transitions_non_stat_article-1_'+str(number_world)+'_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
             transitions_strong_non_stat=np.load('Mondes/Transitions_strong_non_stat_-1_'+str(number_world)+'_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
-            environments_parameters["Lopes_non_stat_article_{0}_-1".format(number_world)+'{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_non_stat_article}
-            environments_parameters["Lopes_strong_non_stat_{0}_-1".format(number_world)+'{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_strong_non_stat}
+            environments_parameters["Lopes_non_stat_article_-1_{0}".format(number_world)+'{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_non_stat_article}
+            environments_parameters["Lopes_strong_non_stat_-1_{0}".format(number_world)+'{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_strong_non_stat}
     return environments_parameters
-
-loading_environments()
 
 ### PICTURES ###
 
@@ -135,12 +134,13 @@ def plot_VI(environment,gamma,accuracy): #only in gridworlds
     return Graphique(environment,V_2,action)
 
 
-environments_parameters=loading_environments()
 
-def compute_optimal_policies(environments_parameters=environments_parameters):
-    for name_environment in environments_parameters.keys():
-        environments_parameters['transitions']=environments_parameters['transitions_after_change']
-        environment=Lopes_State(**environments_parameters[name_environment])
+def compute_optimal_policies():
+    environment_parameters=loading_environments()
+    for name_environment in environment_parameters.keys():
+        if 'transitions_after_change' in environment_parameters[name_environment].keys():
+            environment_parameters[name_environment]['transitions']=environment_parameters[name_environment]['transitions_after_change']
+        environment=Lopes_State(**environment_parameters[name_environment])
         gridworld=plot_VI(environment,gamma=0.95,accuracy=0.001)
         pygame.image.save(gridworld.screen,"Images/Optimal policy/VI_"+name_environment+".png")
 

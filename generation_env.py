@@ -45,7 +45,8 @@ def transition_Lopes(alphas=[1,0.1]):
                                                                    
 states_optimal_path=[(0,0),(1,0),(2,0),(3,0),(3,1),(3,2),(3,3),(3,4)]
 
-def non_stat_Lopes_article(transitions,index_state_to_change=np.random.randint(len(states_optimal_path))):
+def non_stat_Lopes_article(transitions,index_state_to_change):
+        copy_transitions=transitions.copy()
         state_to_change=states_optimal_path[index_state_to_change]
         liste_rotation=[j for j in range(5)]
         valid=False
@@ -58,8 +59,8 @@ def non_stat_Lopes_article(transitions,index_state_to_change=np.random.randint(l
                     break
         new_transitions=[transitions[rotation][state_to_change[0]][state_to_change[1]] for rotation in liste_rotation]
         for action in range(5):
-            transitions[action][state_to_change[0]][state_to_change[1]]=new_transitions[action]
-        return transitions
+            copy_transitions[action][state_to_change[0]][state_to_change[1]]=new_transitions[action]
+        return copy_transitions
 
 #Non-stationarity on all the states of the optimal path
 
@@ -122,7 +123,7 @@ def generate_non_stationarity_article(world_number=1,number_of_worlds=1,malus=-0
     for index_world in range(1,world_number+1):
         transitions=np.load('Mondes/Transitions_Lopes_'+str(malus)+'_'+str(index_world)+'.npy',allow_pickle=True)
         for non_stat_number in range(1,number_of_worlds+1):
-            transitions_non_stationary_article=non_stat_Lopes_article(transitions)
+            transitions_non_stationary_article=non_stat_Lopes_article(transitions,np.random.randint(len(states_optimal_path)))
             np.save('Mondes/Transitions_non_stat_article'+str(malus)+'_'+str(index_world)+'_'+str(non_stat_number)+'.npy',transitions_non_stationary_article)
         
 def generate_strong_non_stationarity_(world_number=1,number_of_worlds=1,malus=-0.1):

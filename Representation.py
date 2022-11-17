@@ -17,14 +17,14 @@ class Graphique():
         self.BLUE = (0, 0, 255)
         self.YELLOW = (255, 255, 0)
         self.PURPLE=(108,2,119)
-        self.WIDTH = 90
-        self.HEIGHT = 90
-        self.MARGIN = 10
+        self.WIDTH = 45
+        self.HEIGHT = 45
+        self.MARGIN = 5
         self.color = self.WHITE
         
         pygame.init()
         pygame.font.init()
-        self.size = (environment.height*100, environment.width*100)
+        self.size = (environment.height*50, environment.width*50)
         self.screen = pygame.Surface(self.size)
         
         self.font = pygame.font.SysFont('arial', 16)

@@ -42,7 +42,7 @@ pas_VI=50
 agents={'Epsilon_MB':Epsilon_MB_Agent}
 #environments=['Lopes_{0}'.format(num) for num in range(1,21)]+['Lopes_nostat_{0}'.format(num) for num in range(1,21)]
 
-names_env = ['Lopes_{0}'.format(num) for num in range(1,2)]
+names_env = ['Lopes']
     
 rewards={(name_agent,name_environment):[] for name_agent in agents.keys() for name_environment in names_env}
 steps={(name_agent,name_environment):[] for name_agent in agents.keys() for name_environment in names_env}
