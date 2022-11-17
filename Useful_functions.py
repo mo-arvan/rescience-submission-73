@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 
 
 from Lopesworld import Lopes_State
-from Lopes_no_stat import Lopes_nostat
 
 from greedyMB import Epsilon_MB_Agent
 from RmaxLP import RmaxLP_Agent
@@ -53,17 +52,24 @@ def play(environment, agent, trials=200, max_step=500, screen=0,photos=[10,20,50
 
 def loading_environments():
     environments_parameters={}
-    all_environments={}
-    for number_world in range(1,21):
-        transitions_lopes=np.load('Mondes/Transitions_Lopes_no_stat '+str(number_world)+'.npy',allow_pickle=True)
-        transitions_lopes_i_variable=np.load('Mondes/Transitions_Lopes_'+str(number_world)+'.npy',allow_pickle=True)
-        environments_parameters["Lopes_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable}
-        
-        environments_parameters["Lopes_nostat_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable,'transitions_no_stat':transitions_lopes}
-        environments_parameters["Lopes_{0}".format(number_world)]={'transitions':transitions_lopes_i_variable}
-        all_environments["Lopes_nostat_{0}".format(number_world)]=Lopes_nostat
-        all_environments["Lopes_{0}".format(number_world)]=Lopes_State
-    return all_environments,environments_parameters
+    reward_0_1=np.load('Mondes/Rewards_Lopes_1_-0.1.npy',allow_pickle=True)
+    reward_1=np.load('Mondes/Rewards_Lopes_1_-1.npy',allow_pickle=True)
+    transitions_lopes=np.load('Mondes/Transitions_Lopes_-0.1_1.npy',allow_pickle=True)
+    environments_parameters['Lopes']={'transitions':transitions_lopes,'rewards':reward_0_1}
+    for number_non_stationarity in range(1,21):
+        transitions_non_stat_article=np.load('Mondes/Transitions_non_stat_article-0.1_1_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
+        transitions_strong_non_stat=np.load('Mondes/Transitions_strong_non_stat_-0.1_1_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
+        environments_parameters["Lopes_non_stat_article_{0}_-0.1".format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_0_1,'transitions_after_change':transitions_non_stat_article}
+        environments_parameters["Lopes_strong_non_stat_{0}_-0.1".format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_0_1,'transitions_after_change':transitions_strong_non_stat}
+    for number_world in range(1,11):
+        for number_non_stationarity in range(1,11):
+            transitions_non_stat_article=np.load('Mondes/Transitions_non_stat_article-1_'+str(number_world)+'_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
+            transitions_strong_non_stat=np.load('Mondes/Transitions_strong_non_stat_-1_'+str(number_world)+'_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
+            environments_parameters["Lopes_non_stat_article_{0}_-1".format(number_world)+'{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_non_stat_article}
+            environments_parameters["Lopes_strong_non_stat_{0}_-1".format(number_world)+'{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_strong_non_stat}
+    return environments_parameters
+
+loading_environments()
 
 ### PICTURES ###
 
@@ -104,7 +110,6 @@ def normalized_table(table,environment):
         q_values = table[state]
         max_value_state=max(q_values.values())
         max_every_state[state]=max_value_state
-        
         best_action = np.random.choice([k for k, v in q_values.items() if v == max_value_state])
         action_every_state[state]=best_action
     mini,maxi=np.min(max_every_state),np.max(max_every_state)
@@ -114,13 +119,31 @@ def normalized_table(table,environment):
  
 def picture_world(environment,table):       
     max_Q,best_actions=normalized_table(table,environment)
-    init_loc=[environment.first_location[0],environment.first_location[1]]
-    screen_size = environment.height*50
-    cell_width = 45
-    cell_height = 45
-    cell_margin = 5
-    gridworld = Graphique(screen_size,cell_width, cell_height, cell_margin,environment.grid,environment.reward_states,init_loc,max_Q,best_actions)
+    gridworld = Graphique(environment,max_Q,best_actions)
     return gridworld
+
+
+def plot_VI(environment,gamma,accuracy): #only in gridworlds
+    V,action=value_iteration(environment,gamma,accuracy)
+    V_2=np.zeros((environment.height,environment.width))
+    for state,value in V.items():
+        V_2[state]=value
+        if V_2[state]<0:V_2[state]=0
+    V_2=V_2-np.min(V_2)
+    max_value=np.max(V_2)
+    V_2=V_2/max_value
+    return Graphique(environment,V_2,action)
+
+
+environments_parameters=loading_environments()
+
+def compute_optimal_policies(environments_parameters=environments_parameters):
+    for name_environment in environments_parameters.keys():
+        environments_parameters['transitions']=environments_parameters['transitions_after_change']
+        environment=Lopes_State(**environments_parameters[name_environment])
+        gridworld=plot_VI(environment,gamma=0.95,accuracy=0.001)
+        pygame.image.save(gridworld.screen,"Images/Optimal policy/VI_"+name_environment+".png")
+
 
 ### SAVING PARAMETERS ####
 

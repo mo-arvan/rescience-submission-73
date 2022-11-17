@@ -77,6 +77,9 @@ def reward_Lopes(bonus=1,malus=-0.1):
         array_rewards[state]=reward
     return array_rewards
 
+def save_rewards(bonus=1,malus=-0.1):
+    array_rewards=reward_Lopes(bonus,malus)
+    np.save('Mondes/Rewards_Lopes_'+str(bonus)+'_'+str(malus)+'.npy',array_rewards)
         
 #Validity of the worlds generated     
 
@@ -130,11 +133,16 @@ def generate_strong_non_stationarity_(world_number=1,number_of_worlds=1,malus=-0
             np.save('Mondes/Transitions_strong_non_stat_'+str(malus)+'_'+str(index_world)+'_'+str(non_stat_number)+'.npy',transitions_strong_non_stationarity)
 
 
+
+#generate the reward matrices 
+save_rewards(1,-0.1)
+save_rewards(1,-1)
+
 #Generating a world similar to the one in the article
 np.random.seed(1)
 generate_valid_stationary_environments(number_of_worlds=1,alphas=[1,0.1],malus=-0.1,bonus=1)
 
-#Generating 20 changes in the optimal path
+#Generating 20 worlds with one change in the optimal path
 np.random.seed(2)
 generate_non_stationarity_article(world_number=1,number_of_worlds=20,malus=-0.1)
 

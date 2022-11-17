@@ -8,7 +8,7 @@ from Useful_functions import plot3D,convergence,save_pickle, open_pickle,value_i
 
 
 from Lopesworld import Lopes_State
-from Lopes_no_stat import Lopes_nostat
+
 
 
 from Rmax import Rmax_Agent
@@ -19,7 +19,7 @@ from RmaxLP import RmaxLP_Agent
 
 #Initializing parameters
 
-all_environments,environments_parameters=loading_environments()
+environments_parameters=loading_environments()
 seed=173
 np.random.seed(seed)
 random.seed(seed)
@@ -55,7 +55,7 @@ for name_environment in names_env:
         print(iteration)
         for name_agent,agent in agents.items(): 
             print(name_agent)
-            environment=all_environments[name_environment](**environments_parameters[name_environment])
+            environment=Lopes_State(**environments_parameters[name_environment])
             
             globals()[name_agent]=agent(environment,**agent_parameters[agent]) #Defining a new agent from the dictionary agents
             

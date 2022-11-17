@@ -1,1 +1,1 @@
-This code aims to partially replicate the results obtained by Lopes, Lang, Toussaint and Oudeyer (2012).
+This code tries to replicate the results obtained by Lopes, Lang, Toussaint and Oudeyer (2012).
