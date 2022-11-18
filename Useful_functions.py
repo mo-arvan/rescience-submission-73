@@ -66,8 +66,8 @@ def loading_environments():
         for number_non_stationarity in range(1,11):
             transitions_non_stat_article=np.load('Mondes/Transitions_non_stat_article-1_'+str(number_world)+'_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
             transitions_strong_non_stat=np.load('Mondes/Transitions_strong_non_stat_-1_'+str(number_world)+'_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
-            environments_parameters["Lopes_non_stat_article_-1_{0}".format(number_world)+'{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_non_stat_article}
-            environments_parameters["Lopes_strong_non_stat_-1_{0}".format(number_world)+'{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_strong_non_stat}
+            environments_parameters["Lopes_non_stat_article_-1_{0}".format(number_world)+'_{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_non_stat_article}
+            environments_parameters["Lopes_strong_non_stat_-1_{0}".format(number_world)+'_{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_strong_non_stat}
     return environments_parameters
 
 ### PICTURES ###
@@ -118,8 +118,8 @@ def normalized_table(table,environment):
  
 def picture_world(environment,table):       
     max_Q,best_actions=normalized_table(table,environment)
-    gridworld = Graphique(environment,max_Q,best_actions)
-    return gridworld
+    return Graphique(environment,max_Q,best_actions)
+
 
 
 def plot_VI(environment,gamma,accuracy): #only in gridworlds
@@ -132,8 +132,6 @@ def plot_VI(environment,gamma,accuracy): #only in gridworlds
     max_value=np.max(V_2)
     V_2=V_2/max_value
     return Graphique(environment,V_2,action)
-
-
 
 def compute_optimal_policies():
     environment_parameters=loading_environments()

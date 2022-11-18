@@ -20,17 +20,17 @@ from RmaxLP import RmaxLP_Agent
 #Initializing parameters
 
 environments_parameters=loading_environments()
-seed=173
+seed=12
 np.random.seed(seed)
 random.seed(seed)
-agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.3},
-            Rmax_Agent:{'gamma':0.95, 'm':6,'Rmax':1,'u_m':12,'correct_prior':True},
+agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.2},
+            Rmax_Agent:{'gamma':0.95, 'm':8,'Rmax':1,'u_m':15,'correct_prior':True},
             BEB_Agent:{'gamma':0.95,'beta':3,'correct_prior':True,'coeff_prior':0.001,'informative':False},
             BEBLP_Agent:{'gamma':0.95,'beta':2.4,'step_update':10,'coeff_prior':0.001,'alpha':0.4},
             RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'alpha':0.3,'m':2},}
 
 
-nb_iters=1
+nb_iters=5
 trials = 100
 max_step =30
 photos=[10,20,30]
@@ -39,7 +39,7 @@ accuracy=0.01
 pas_VI=50
 
 #agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
-agents={'Epsilon_MB':Epsilon_MB_Agent}
+agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
 #environments=['Lopes_{0}'.format(num) for num in range(1,21)]+['Lopes_nostat_{0}'.format(num) for num in range(1,21)]
 
 names_env = ['Lopes']
@@ -51,10 +51,10 @@ pol_error={(name_agent,name_environment):[] for name_agent in agents.keys() for 
 
 for name_environment in names_env:   
     print(name_environment)
-    for iteration in range(nb_iters):
-        print(iteration)
-        for name_agent,agent in agents.items(): 
-            print(name_agent)
+    for name_agent,agent in agents.items(): 
+        print(name_agent)
+        for iteration in range(nb_iters):
+            print(str(iteration)+'/'+str(nb_iters))
             environment=Lopes_State(**environments_parameters[name_environment])
             
             globals()[name_agent]=agent(environment,**agent_parameters[agent]) #Defining a new agent from the dictionary agents
