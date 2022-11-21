@@ -23,6 +23,8 @@ environments_parameters=loading_environments()
 seed=12
 np.random.seed(seed)
 random.seed(seed)
+
+
 agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.2},
             Rmax_Agent:{'gamma':0.95, 'm':8,'Rmax':1,'u_m':15,'correct_prior':True},
             BEB_Agent:{'gamma':0.95,'beta':3,'correct_prior':True,'coeff_prior':0.001,'informative':False},
@@ -30,7 +32,7 @@ agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.2},
             RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'alpha':0.3,'m':2},}
 
 
-nb_iters=5
+nb_iters=1
 trials = 100
 max_step =30
 photos=[10,20,30]
@@ -39,14 +41,13 @@ accuracy=0.01
 pas_VI=50
 
 #agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
-agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
+agents={'RA':Rmax_Agent}
 #environments=['Lopes_{0}'.format(num) for num in range(1,21)]+['Lopes_nostat_{0}'.format(num) for num in range(1,21)]
 
-names_env = ['Lopes']
+names_env = ['Lopes','Lopes']
     
 rewards={(name_agent,name_environment):[] for name_agent in agents.keys() for name_environment in names_env}
 steps={(name_agent,name_environment):[] for name_agent in agents.keys() for name_environment in names_env}
-exploration={(name_agent,name_environment):[] for name_agent in agents.keys() for name_environment in names_env}
 pol_error={(name_agent,name_environment):[] for name_agent in agents.keys() for name_environment in names_env}
 
 for name_environment in names_env:   
@@ -63,7 +64,6 @@ for name_environment in names_env:
             
             rewards[(name_agent,name_environment)].append(reward)
             steps[(name_agent,name_environment)].append(step_number)
-            exploration[(name_agent,name_environment)].append(sum([len(value.keys()) for value in globals()[name_agent].counter.values()])/environment.max_exploration)
             pol_error[(name_agent,name_environment)].append(policy_value_error)
             
 
@@ -84,7 +84,6 @@ test=open_pickle('Results/'+temps+'.pickle')
 
 mean_rewards={(name_agent,name_environment): np.mean(rewards[(name_agent,name_environment)]) for name_agent in agents.keys() for name_environment in names_env}
 
-mean_exploration={(name_agent,name_environment): np.mean(exploration[(name_agent,name_environment)]) for name_agent in agents.keys() for name_environment in names_env}
 stats_convergence={(name_agent,name_environment):[convergence(rewards[(name_agent,name_environment)][nb_iter]) for nb_iter in range(nb_iters)]for name_agent in agents.keys() for name_environment in names_env}
 avg_stats={(name_agent,name_environment): np.average(stats_convergence[(name_agent,name_environment)],axis=0)for name_agent in agents.keys() for name_environment in names_env}
 
@@ -100,7 +99,6 @@ mean_pol_error={(name_agent,name_environment):np.average([pol_error[name_agent,n
 
 mean_reward_agent={name_agent: np.mean([mean_rewards[(name_agent,name_environment)]for name_environment in names_env]) for name_agent in agents.keys() }
 
-mean_exploration_agent={name_agent: np.mean([mean_exploration[(name_agent,name_environment)]for name_environment in names_env]) for name_agent in agents.keys() }
 
 stats_agent={name_agent:np.average([avg_stats[(name_agent,name_environment)] for name_environment in names_env],axis=0) for name_agent in agents.keys()}
 step_plateau_agent={name_agent: np.average([avg_step_plateau[(name_agent,name_environment)] for name_environment in names_env],axis=0) for name_agent in agents.keys()}
@@ -112,7 +110,7 @@ print("")
 for name_agent in agents.keys():
     print(name_agent+' : '+ 'avg_reward= '+str(round(mean_reward_agent[name_agent],2))+", trial_conv= "+str(stats_agent[name_agent][0])+
           ', step_conv= '+str(round(step_plateau_agent[name_agent]))+
-          ', mean= '+str(round(stats_agent[name_agent][1],2))+', var= '+str(round(stats_agent[name_agent][2],2))+', explo= '+str(round(mean_exploration_agent[name_agent],2)))
+          ', mean= '+str(round(stats_agent[name_agent][1],2))+', var= '+str(round(stats_agent[name_agent][2],2)))
     print("")
 
 
@@ -120,7 +118,7 @@ for name_agent in agents.keys():
 
 rewards_agent_environment={(name_agent,name_environment): np.average(np.array(rewards[name_agent,name_environment]),axis=0) for name_environment in names_env for name_agent in agents.keys()}
 rewards_agent={name_agent: np.average(np.average(np.array([rewards[name_agent,name_environment] for name_environment in names_env]),axis=1),axis=0) for name_agent in agents.keys()}
-std_rewards_agent={name_agent: np.std(np.array([rewards[name_agent,name_environment] for name_environment in names_env]),axis=0)[0] for name_agent in agents.keys()}
+std_rewards_agent={name_agent: np.std(np.array([rewards[name_agent,name_environment] for name_environment in names_env for iteration in range(nb_iters)]),axis=0)[0] for name_agent in agents.keys()}
 
 
     
@@ -156,19 +154,6 @@ plt.ylabel("Reward")
 plt.grid(linestyle='--')
 plt.legend()
 plt.savefig('Results/Rewards'+temps+names_env[0]+'.png')
-plt.show()
-
-fig_reward=plt.figure(dpi=300)
-ax_reward=fig_reward.add_subplot(1,1,1)
-for name_agent in agents.keys():
-    plt.plot([i+1 for i in range(trials)],rewards_agent[name_agent], 
-                 color=colors[name_agent],linewidth=linewidths[name_agent],
-                 label=rename[name_agent],ms=marker_sizes[name_agent],marker=markers[name_agent],fillstyle='none')
-plt.xlabel("Trial")
-plt.ylabel("Reward")
-plt.grid(linestyle='--')
-plt.legend()
-plt.savefig('Results/Rewards_nostd'+temps+names_env[0]+'.png')
 plt.show()
 
 
