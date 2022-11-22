@@ -21,7 +21,6 @@ from policy_Functions import value_iteration,get_optimal_policy,policy_evaluatio
 
 def play(environment, agent, trials=200, max_step=500, screen=0,photos=[10,20,50,100,199,300,499],accuracy=0.01,pas_VI=50):
     reward_per_episode = []
-    step_number=[]
     policy_value_error=[]
     pol_updated=False
     val_iteration,_=value_iteration(environment,agent.gamma,accuracy)
@@ -46,9 +45,8 @@ def play(environment, agent, trials=200, max_step=500, screen=0,photos=[10,20,50
             if terminal == True or step==max_step:
                 game_over = True
                 environment.current_location=environment.first_location
-                step_number.append(agent.step_counter)
         reward_per_episode.append(cumulative_reward)
-    return reward_per_episode,step_number,policy_value_error
+    return reward_per_episode,policy_value_error
 
 def loading_environments():
     environments_parameters={}
