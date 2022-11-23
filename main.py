@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import time
 
 from Useful_functions import play
-from Useful_functions import plot3D,convergence,save_pickle, open_pickle,value_iteration,policy_evaluation, loading_environments
+from Useful_functions import save_pickle, loading_environments
 
 
 from Lopesworld import Lopes_State
@@ -16,15 +16,13 @@ from greedyMB import Epsilon_MB_Agent
 from BEBLP import BEBLP_Agent
 from RmaxLP import RmaxLP_Agent
 
-#Initializing parameters
-
-
 
 def loop_play(play_parameters,names_environments=['Lopes'],agents_tested={'Epsilon_MB':Epsilon_MB_Agent},number_of_iterations=1):
     rewards,pol_error={},{}
     for name_environment in names_environments:   
         for name_agent,agent in agents_tested.items(): 
             for iteration in range(number_of_iterations):
+                #print(str(name_agent)+' '+str(iteration)+'/'+str(number_of_iterations))
                 environment=Lopes_State(**environments_parameters[name_environment])
             
                 globals()[name_agent]=agent(environment,**agent_parameters[agent]) #Defining a new agent from the dictionary agents
@@ -87,7 +85,22 @@ def plot(pol,std_pol,reward,std_reward,agents_tested,names_environments,play_par
     plt.legend()
     plt.savefig('Results/Rewards'+time_end+names_environments[0]+'.png')
     plt.show()
+ 
     
+def play_with_params(name_environment,name_agent,agent,iteration,play_parameters):
+    environment=Lopes_State(**environments_parameters[name_environment])
+    globals()[name_agent]=agent(environment,**agent_parameters[agent])
+    return (name_environment,name_agent,iteration),play(environment,globals()[name_agent],**play_parameters)
+    
+def getting_simulations_to_do(names_environments=['Lopes'],agents_tested={'Epsilon_MB':Epsilon_MB_Agent},number_of_iterations=2):
+    every_simulation=[]
+    for name_environment in names_environments:   
+        for name_agent,agent in agents_tested.items(): 
+            for iteration in range(number_of_iterations):
+                    every_simulation.append((name_environment,name_agent,agent,iteration))
+    return every_simulation  
+    
+  
 ###Actual experiment ###
 
 environments_parameters=loading_environments()
@@ -102,16 +115,74 @@ agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.2},
 np.random.seed(10)
 
 environments=['Lopes']
-agents={'Epsilon_MB':Epsilon_MB_Agent}
-nb_iters=5
+#={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
+agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
+nb_iters=20
 
 play_params={'trials':100, 'max_step':30, 'screen':False,'photos':[10,20,50,100,199,300,499],'accuracy':0.01,'pas_VI':50}
 
-rewards,pol_error=loop_play(play_params,environments,agents,nb_iters)
-pol,std_pol, reward, std_reward=extracting_results(rewards,pol_error,environments,agents,nb_iters)
-plot(pol,std_pol,reward,std_reward,agents,environments,play_params)
+
+every_simulation=getting_simulations_to_do(environments,agents,nb_iters)
+
+from multiprocessing import Pool
 
 
+#rewards,pol_error=loop_play(play_params,environments,agents,nb_iters)
+
+all_params=[play_params,every_simulation]
+
+def fast_loop(args):
+    return play_with_params(args[1][0],args[1][1],args[1][2],args[1][3],args[0])
+
+before = time.time()
+if __name__ == '__main__':
+    pool = Pool()
+    all_args=[[play_params,one_simulation] for one_simulation in every_simulation]
+    results=pool.map(fast_loop,all_args)
+    pool.close()
+    pool.join()
+    pol_errors,rewards={},{}
+    for result in results : 
+        pol_errors[result[0]]=result[1][0]
+        rewards[result[0]]=result[1][1]
+after = time.time()
+print(str(after - before))
+
+
+"""
+from multiprocessing import Pool
+
+
+#rewards,pol_error=loop_play(play_params,environments,agents,nb_iters)
+def fast_loop(args) :
+    rewards, pol_error=loop_play(args[0],args[1],args[2],args[3])
+    return rewards,pol_error
+
+all_params=[play_params,environments,agents,nb_iters]
+
+
+before = time.time()
+rewards,pol_error=fast_loop(all_params)
+after = time.time()
+print(str(after - before))
+
+print("-----")
+
+before = time.time()
+if __name__ == '__main__':
+    pool = Pool()
+    results=pool.map(fast_loop,[all_params])
+    rewards,pol_error=results[0][0],results[0][1]
+    pool.close()
+    pool.join()
+after = time.time()
+print(str(after - before))
+"""
+
+
+
+"""pol,std_pol, reward, std_reward=extracting_results(rewards,pol_error,environments,agents,nb_iters)
+plot(pol,std_pol,reward,std_reward,agents,environments,play_params)"""
 
 
 

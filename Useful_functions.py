@@ -4,17 +4,10 @@ import pygame
 import seaborn as sns
 import pandas as pd
 import pickle
-import time
-import matplotlib.pyplot as plt
-
 
 from Lopesworld import Lopes_State
 
-from greedyMB import Epsilon_MB_Agent
-from RmaxLP import RmaxLP_Agent
-from Rmax import Rmax_Agent
-from BEB import BEB_Agent
-from BEBLP import BEBLP_Agent
+
 from Representation import Graphique
 from policy_Functions import value_iteration,get_optimal_policy,policy_evaluation
 
@@ -67,6 +60,9 @@ def loading_environments():
             environments_parameters["Lopes_non_stat_article_-1_{0}".format(number_world)+'_{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_non_stat_article}
             environments_parameters["Lopes_strong_non_stat_-1_{0}".format(number_world)+'_{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_strong_non_stat}
     return environments_parameters
+
+
+
 
 ### PICTURES ###
 
