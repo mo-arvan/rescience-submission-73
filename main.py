@@ -17,42 +17,53 @@ from BEBLP import BEBLP_Agent
 from RmaxLP import RmaxLP_Agent
 
 
-def loop_play(play_parameters,names_environments=['Lopes'],agents_tested={'Epsilon_MB':Epsilon_MB_Agent},number_of_iterations=1):
-    rewards,pol_error={},{}
-    for name_environment in names_environments:   
-        for name_agent,agent in agents_tested.items(): 
-            for iteration in range(number_of_iterations):
-                #print(str(name_agent)+' '+str(iteration)+'/'+str(number_of_iterations))
-                environment=Lopes_State(**environments_parameters[name_environment])
-            
-                globals()[name_agent]=agent(environment,**agent_parameters[agent]) #Defining a new agent from the dictionary agents
-            
-                reward,policy_value_error= play(environment,globals()[name_agent],**play_parameters) #Playing in environment
-            
-                rewards[(name_agent,name_environment,iteration)]=reward
-                pol_error[(name_agent,name_environment,iteration)]=policy_value_error
-    
-    global time_end
-    time_end=str(round(time.time()))
-    results={'nb_iters':number_of_iterations,'play_parameters':play_parameters,'agent_parameters':agent_parameters,'agents':agents_tested,'environments':names_environments,'rewards':rewards,'pol_error':pol_error}
-    np.save('Results/'+time_end+'_polerror.npy',pol_error)
-    save_pickle(results,'Results/'+time_end+'.pickle')
-    return rewards, pol_error
 
+#Main function 
+
+
+from multiprocessing import Pool
+
+
+def fast_loop(args):
+    return play_with_params(args[1][0],args[1][1],args[1][2],args[1][3],args[0],args[2])
+
+from os import cpu_count
+
+
+def main_function(cores_used=min(cpu_count(),28)) :
+    before=time.time()
+    all_args=[[play_params,every_simulation[seed],all_seeds[seed]] for seed in range(len(all_seeds))]
+    len(all_args)
+    pool = Pool(processes=cores_used)
+    results=pool.map(fast_loop,all_args)
+    pool.close()
+    pool.join()
+    pol_errors,rewards={},{}
+    for result in results : 
+        pol_errors[result[0]]=result[1][1]
+        rewards[result[0]]=result[1][0]
+    time_after = time.time()
+    print(str(time_after - before))
+    return pol_errors,rewards
 
 
 ### Extracting results ###
 
 def extracting_results(rewards,pol_error,names_environments,agents_tested,number_of_iterations):
-    mean_pol_error_agent={name_agent: np.average([np.average([pol_error[name_agent,name_environment,i] for i in range(number_of_iterations)],axis=0) for name_environment in names_environments],axis=0) for name_agent in agents_tested.keys()}
-    std_pol_error_agent={name_agent:np.std([pol_error[name_agent,name_environment,i] for name_environment in names_environments for i in range(number_of_iterations)],axis=0)/np.sqrt(number_of_iterations*len(names_environments)) for name_agent in agents_tested.keys()}
-    rewards_agent={name_agent: np.average([np.average([rewards[name_agent,name_environment,i] for i in range(number_of_iterations)],axis=0) for name_environment in names_environments],axis=0) for name_agent in agents_tested.keys()}
-    std_rewards_agent={name_agent: np.std(np.array([rewards[name_agent,name_environment,iteration] for name_environment in names_environments for iteration in range(number_of_iterations)]),axis=0)[0] for name_agent in agents_tested.keys()}
+    mean_pol_error_agent={name_agent: np.average([np.average([pol_error[name_agent,name_environment,i] for i in range(number_of_iterations)],axis=0) for name_environment in names_environments],axis=0) for name_agent in agents_tested}
+    std_pol_error_agent={name_agent:np.std([pol_error[name_agent,name_environment,i] for name_environment in names_environments for i in range(number_of_iterations)],axis=0)/np.sqrt(number_of_iterations*len(names_environments)) for name_agent in agents_tested}
+    rewards_agent={name_agent: np.average([np.average([rewards[name_agent,name_environment,i] for i in range(number_of_iterations)],axis=0) for name_environment in names_environments],axis=0) for name_agent in agents_tested}
+    std_rewards_agent={name_agent:np.std([rewards[name_agent,name_environment,i] for name_environment in names_environments for i in range(number_of_iterations)],axis=0)/np.sqrt(number_of_iterations*len(names_environments)) for name_agent in agents_tested}
     return mean_pol_error_agent,std_pol_error_agent, rewards_agent, std_rewards_agent
 
 ###Basic visualisation ###
     
-def plot(pol,std_pol,reward,std_reward,agents_tested,names_environments,play_parameters):
+def save_and_plot(pol,std_pol,reward,std_reward,agents_tested,names_environments,play_parameters):
+    time_end=str(round(time.time()%1e7))
+    results={'play_parameters':play_parameters,'agent_parameters':agent_parameters,'agents':agents_tested,'environments':names_environments,'rewards':reward,'pol_error':pol}
+    np.save('Results/'+time_end+'_polerror.npy',pol)
+    save_pickle(results,'Results/'+time_end+'.pickle')
+    
     rename={'RA':'R-max','BEB':'BEB','BEBLP':'ζ-EB','RALP':'ζ-R-max','Epsilon_MB':'Ɛ-greedy'}
     colors={'RA':'royalblue','RALP':'royalblue','Epsilon_MB':'red','BEB':'black','BEBLP':'black'}
     linewidths={'RA':'0.75','RALP':'1.25','BEB':'0.75','BEBLP':'1.25','Epsilon_MB':'0.75'}
@@ -87,10 +98,11 @@ def plot(pol,std_pol,reward,std_reward,agents_tested,names_environments,play_par
     plt.show()
  
     
-def play_with_params(name_environment,name_agent,agent,iteration,play_parameters):
+def play_with_params(name_environment,name_agent,agent,iteration,play_parameters,seed):
+    np.random.seed(seed)
     environment=Lopes_State(**environments_parameters[name_environment])
     globals()[name_agent]=agent(environment,**agent_parameters[agent])
-    return (name_environment,name_agent,iteration),play(environment,globals()[name_agent],**play_parameters)
+    return (name_agent,name_environment,iteration),play(environment,globals()[name_agent],**play_parameters)
     
 def getting_simulations_to_do(names_environments=['Lopes'],agents_tested={'Epsilon_MB':Epsilon_MB_Agent},number_of_iterations=2):
     every_simulation=[]
@@ -100,8 +112,8 @@ def getting_simulations_to_do(names_environments=['Lopes'],agents_tested={'Epsil
                     every_simulation.append((name_environment,name_agent,agent,iteration))
     return every_simulation  
     
-  
-###Actual experiment ###
+   
+### Experiments ###
 
 environments_parameters=loading_environments()
 
@@ -112,77 +124,22 @@ agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.2},
             RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'alpha':0.3,'m':2}}
 
 #First experiment
-np.random.seed(10)
 
 environments=['Lopes']
-#={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
+#agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
 agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
-nb_iters=20
+nb_iters=5
 
 play_params={'trials':100, 'max_step':30, 'screen':False,'photos':[10,20,50,100,199,300,499],'accuracy':0.01,'pas_VI':50}
 
 
 every_simulation=getting_simulations_to_do(environments,agents,nb_iters)
-
-from multiprocessing import Pool
-
-
-#rewards,pol_error=loop_play(play_params,environments,agents,nb_iters)
-
-all_params=[play_params,every_simulation]
-
-def fast_loop(args):
-    return play_with_params(args[1][0],args[1][1],args[1][2],args[1][3],args[0])
-
-before = time.time()
-if __name__ == '__main__':
-    pool = Pool()
-    all_args=[[play_params,one_simulation] for one_simulation in every_simulation]
-    results=pool.map(fast_loop,all_args)
-    pool.close()
-    pool.join()
-    pol_errors,rewards={},{}
-    for result in results : 
-        pol_errors[result[0]]=result[1][0]
-        rewards[result[0]]=result[1][1]
-after = time.time()
-print(str(after - before))
+all_seeds=[i for i in range(len(every_simulation))]
 
 
-"""
-from multiprocessing import Pool
-
-
-#rewards,pol_error=loop_play(play_params,environments,agents,nb_iters)
-def fast_loop(args) :
-    rewards, pol_error=loop_play(args[0],args[1],args[2],args[3])
-    return rewards,pol_error
-
-all_params=[play_params,environments,agents,nb_iters]
-
-
-before = time.time()
-rewards,pol_error=fast_loop(all_params)
-after = time.time()
-print(str(after - before))
-
-print("-----")
-
-before = time.time()
-if __name__ == '__main__':
-    pool = Pool()
-    results=pool.map(fast_loop,[all_params])
-    rewards,pol_error=results[0][0],results[0][1]
-    pool.close()
-    pool.join()
-after = time.time()
-print(str(after - before))
-"""
-
-
-
-"""pol,std_pol, reward, std_reward=extracting_results(rewards,pol_error,environments,agents,nb_iters)
-plot(pol,std_pol,reward,std_reward,agents,environments,play_params)"""
+pol_errors,rewards=main_function()
+pol,std_pol, reward, std_reward=extracting_results(rewards,pol_errors,environments,agents,nb_iters)
+save_and_plot(pol,std_pol,reward,std_reward,agents,environments,play_params)
 
 
 
