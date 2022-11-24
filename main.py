@@ -27,14 +27,11 @@ from multiprocessing import Pool
 def fast_loop(args):
     return play_with_params(args[1][0],args[1][1],args[1][2],args[1][3],args[0],args[2])
 
-from os import cpu_count
 
-
-def main_function(cores_used=min(cpu_count(),28)) :
+def main_function() :
     before=time.time()
     all_args=[[play_params,every_simulation[seed],all_seeds[seed]] for seed in range(len(all_seeds))]
-    len(all_args)
-    pool = Pool(processes=cores_used)
+    pool = Pool()
     results=pool.map(fast_loop,all_args)
     pool.close()
     pool.join()
@@ -43,7 +40,7 @@ def main_function(cores_used=min(cpu_count(),28)) :
         pol_errors[result[0]]=result[1][1]
         rewards[result[0]]=result[1][0]
     time_after = time.time()
-    print(str(time_after - before))
+    print('Computation time: '+str(time_after - before))
     return pol_errors,rewards
 
 
@@ -51,21 +48,21 @@ def main_function(cores_used=min(cpu_count(),28)) :
 
 def extracting_results(rewards,pol_error,names_environments,agents_tested,number_of_iterations):
     mean_pol_error_agent={name_agent: np.average([np.average([pol_error[name_agent,name_environment,i] for i in range(number_of_iterations)],axis=0) for name_environment in names_environments],axis=0) for name_agent in agents_tested}
-    std_pol_error_agent={name_agent:np.std([pol_error[name_agent,name_environment,i] for name_environment in names_environments for i in range(number_of_iterations)],axis=0)/np.sqrt(number_of_iterations*len(names_environments)) for name_agent in agents_tested}
+    CI_pol_error_agent={name_agent:1.96*np.std([pol_error[name_agent,name_environment,i] for name_environment in names_environments for i in range(number_of_iterations)],axis=0)/np.sqrt(number_of_iterations*len(names_environments)) for name_agent in agents_tested}
     rewards_agent={name_agent: np.average([np.average([rewards[name_agent,name_environment,i] for i in range(number_of_iterations)],axis=0) for name_environment in names_environments],axis=0) for name_agent in agents_tested}
-    std_rewards_agent={name_agent:np.std([rewards[name_agent,name_environment,i] for name_environment in names_environments for i in range(number_of_iterations)],axis=0)/np.sqrt(number_of_iterations*len(names_environments)) for name_agent in agents_tested}
-    return mean_pol_error_agent,std_pol_error_agent, rewards_agent, std_rewards_agent
+    CI_rewards_agent={name_agent:1.96*np.std([rewards[name_agent,name_environment,i] for name_environment in names_environments for i in range(number_of_iterations)],axis=0)/np.sqrt(number_of_iterations*len(names_environments)) for name_agent in agents_tested}
+    return mean_pol_error_agent,CI_pol_error_agent, rewards_agent, CI_rewards_agent
 
 ###Basic visualisation ###
     
-def save_and_plot(pol,std_pol,reward,std_reward,agents_tested,names_environments,play_parameters):
+def save_and_plot(pol,CI_pol,reward,CI_reward,agents_tested,names_environments,play_parameters):
     time_end=str(round(time.time()%1e7))
     results={'play_parameters':play_parameters,'agent_parameters':agent_parameters,'agents':agents_tested,'environments':names_environments,'rewards':reward,'pol_error':pol}
     np.save('Results/'+time_end+'_polerror.npy',pol)
     save_pickle(results,'Results/'+time_end+'.pickle')
     
     rename={'RA':'R-max','BEB':'BEB','BEBLP':'ζ-EB','RALP':'ζ-R-max','Epsilon_MB':'Ɛ-greedy'}
-    colors={'RA':'royalblue','RALP':'royalblue','Epsilon_MB':'red','BEB':'black','BEBLP':'black'}
+    colors={'RA':'#9d02d7','RALP':'#0000ff','Epsilon_MB':"#ff7763",'BEB':"#ffac1e",'BEBLP':"#009435"}
     linewidths={'RA':'0.75','RALP':'1.25','BEB':'0.75','BEBLP':'1.25','Epsilon_MB':'0.75'}
     marker_sizes={'RA':'3','RALP':'3','BEB':'3','BEBLP':'3','Epsilon_MB':'3'}
     
@@ -73,9 +70,13 @@ def save_and_plot(pol,std_pol,reward,std_reward,agents_tested,names_environments
     fig=plt.figure(dpi=300)
     ax = fig.add_subplot(1, 1, 1)
     for name_agent in agents_tested.keys():
-        plt.errorbar([play_parameters['pas_VI']*i for i in range(len(pol[name_agent]))],pol[name_agent], 
-                     yerr=std_pol[name_agent],color=colors[name_agent],linewidth=linewidths[name_agent],
-                     elinewidth=0.5,label=rename[name_agent],ms=marker_sizes[name_agent],marker=markers[name_agent],fillstyle='none',capsize=1)
+        yerr0 = pol[name_agent] - CI_pol[name_agent]
+        yerr1 = pol[name_agent] + CI_pol[name_agent]
+
+        plt.fill_between([play_parameters['pas_VI']*i for i in range(len(pol[name_agent]))], yerr0, yerr1, color=colors[name_agent], alpha=0.2)
+
+        plt.plot([play_parameters['pas_VI']*i for i in range(len(pol[name_agent]))],pol[name_agent],color=colors[name_agent],linewidth=linewidths[name_agent],
+                     label=rename[name_agent],ms=marker_sizes[name_agent],marker=markers[name_agent])
     plt.xlabel("Steps")
     plt.ylabel("Policy value error")
     plt.grid(linestyle='--')
@@ -87,10 +88,15 @@ def save_and_plot(pol,std_pol,reward,std_reward,agents_tested,names_environments
     fig_reward=plt.figure(dpi=300)
     ax_reward=fig_reward.add_subplot(1,1,1)
     for name_agent in agents_tested.keys():
-        plt.errorbar([i+1 for i in range(play_parameters['trials'])],reward[name_agent], 
-                     yerr=std_reward[name_agent],color=colors[name_agent],linewidth=linewidths[name_agent],
-                     elinewidth=0.5,label=rename[name_agent],ms=marker_sizes[name_agent],marker=markers[name_agent],fillstyle='none',capsize=1)
-    plt.xlabel("Trial")
+        yerr0 = reward[name_agent] - CI_reward[name_agent]
+        yerr1 = reward[name_agent] + CI_reward[name_agent]
+
+        plt.fill_between([i+1 for i in range(play_parameters['trials'])], yerr0, yerr1, color=colors[name_agent], alpha=0.2)
+        
+        plt.plot([i+1 for i in range(play_parameters['trials'])],reward[name_agent], 
+                     color=colors[name_agent],linewidth=linewidths[name_agent],
+                     label=rename[name_agent],ms=marker_sizes[name_agent],marker=markers[name_agent])
+    plt.xlabel("Trials")
     plt.ylabel("Reward")
     plt.grid(linestyle='--')
     plt.legend()
@@ -124,13 +130,13 @@ agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.2},
             RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'alpha':0.3,'m':2}}
 
 #First experiment
-
-environments=['Lopes']
+#environments=["Non_stat_article_-1_{0}".format(world)+'_{0}'.format(non_stat) for world in range(1,11) for non_stat in range(1,11)]
+environments=["Non_stat_article_-1_{0}".format(world)+'_{0}'.format(non_stat) for world in range(1,6) for non_stat in range(1,5)]
 #agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
 agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
-nb_iters=5
+nb_iters=1
 
-play_params={'trials':100, 'max_step':30, 'screen':False,'photos':[10,20,50,100,199,300,499],'accuracy':0.01,'pas_VI':50}
+play_params={'trials':100, 'max_step':30, 'screen':False,'photos':[10,20,50,80,99],'accuracy':0.01,'pas_VI':50}
 
 
 every_simulation=getting_simulations_to_do(environments,agents,nb_iters)
@@ -138,8 +144,8 @@ all_seeds=[i for i in range(len(every_simulation))]
 
 
 pol_errors,rewards=main_function()
-pol,std_pol, reward, std_reward=extracting_results(rewards,pol_errors,environments,agents,nb_iters)
-save_and_plot(pol,std_pol,reward,std_reward,agents,environments,play_params)
+pol,CI_pol, reward, CI_reward=extracting_results(rewards,pol_errors,environments,agents,nb_iters)
+save_and_plot(pol,CI_pol,reward,CI_reward,agents,environments,play_params)
 
 
 

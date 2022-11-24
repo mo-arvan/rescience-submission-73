@@ -13,29 +13,23 @@ from policy_Functions import value_iteration,get_optimal_policy,policy_evaluatio
 
 
 def play(environment, agent, trials=200, max_step=500, screen=0,photos=[10,20,50,100,199,300,499],accuracy=0.01,pas_VI=50):
-    reward_per_episode = []
-    policy_value_error=[]
-    pol_updated=False
+    reward_per_episode, policy_value_error=[],[]
     val_iteration,_=value_iteration(environment,agent.gamma,accuracy)
     for trial in range(trials):
-        if screen : take_picture(agent,trial,environment,photos) #Visualisation
-        
+        if screen : take_picture(agent,trial,environment,photos) 
         cumulative_reward, step, game_over= 0,0,False
         while not game_over :
-            if type(environment).__name__ =='Lopes_nostat' and not pol_updated:
-                if environment.changed :
-                    pol_updated=True
+            if environment.total_steps==900:
                     val_iteration,_=value_iteration(environment,agent.gamma,accuracy)
             if agent.step_counter%pas_VI==0:
                 policy_value_error.append(policy_evaluation(environment,get_optimal_policy(agent,environment,agent.gamma,accuracy),agent.gamma,accuracy)[environment.first_location]-val_iteration[environment.first_location]) 
             old_state = environment.current_location
             action = agent.choose_action() 
-            reward , terminal = environment.make_step(action) #reward and if state is terminal
-            new_state = environment.current_location            
+            reward , new_state = environment.make_step(action)            
             agent.learn(old_state, reward, new_state, action)                
             cumulative_reward += reward
             step += 1
-            if terminal == True or step==max_step:
+            if step==max_step:
                 game_over = True
                 environment.current_location=environment.first_location
         reward_per_episode.append(cumulative_reward)
@@ -50,17 +44,16 @@ def loading_environments():
     for number_non_stationarity in range(1,21):
         transitions_non_stat_article=np.load('Mondes/Transitions_non_stat_article-0.1_1_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
         transitions_strong_non_stat=np.load('Mondes/Transitions_strong_non_stat_-0.1_1_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
-        environments_parameters["Lopes_non_stat_article_-0.1_{0}".format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_0_1,'transitions_after_change':transitions_non_stat_article}
-        environments_parameters["Lopes_strong_non_stat_-0.1_{0}".format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_0_1,'transitions_after_change':transitions_strong_non_stat}
+        environments_parameters["Non_stat_article_-0.1_{0}".format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_0_1,'transitions_after_change':transitions_non_stat_article}
+        environments_parameters["Non_stat_strong_-0.1_{0}".format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_0_1,'transitions_after_change':transitions_strong_non_stat}
     for number_world in range(1,11):
         transitions_lopes=np.load('Mondes/Transitions_Lopes_-1_'+str(number_world)+'.npy',allow_pickle=True)
         for number_non_stationarity in range(1,11):
             transitions_non_stat_article=np.load('Mondes/Transitions_non_stat_article-1_'+str(number_world)+'_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
             transitions_strong_non_stat=np.load('Mondes/Transitions_strong_non_stat_-1_'+str(number_world)+'_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
-            environments_parameters["Lopes_non_stat_article_-1_{0}".format(number_world)+'_{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_non_stat_article}
-            environments_parameters["Lopes_strong_non_stat_-1_{0}".format(number_world)+'_{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_strong_non_stat}
+            environments_parameters["Non_stat_article_-1_{0}".format(number_world)+'_{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_non_stat_article}
+            environments_parameters["Non_stat_strong_-1_{0}".format(number_world)+'_{0}'.format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_1,'transitions_after_change':transitions_strong_non_stat}
     return environments_parameters
-
 
 
 
@@ -73,14 +66,14 @@ def take_picture(agent,trial,environment,photos):
                     if type(agent).__name__ in ['BEB_Agent','Rmax_Agent','BEBLP_Agent','RmaxLP_Agent']:
                         pygame.image.save(img.screen,"Images/Solo/"+type(agent).__name__+"_"+type(environment).__name__+"_"+str(trial)+".png")
                     else : pygame.image.save(img.screen,"Images/"+type(agent).__name__+"_"+type(environment).__name__+"_"+str(trial)+".png")
-                    if type(agent).__name__=='Rmax_Agent': bonus=copy.deepcopy(agent.R)
-                    if type(agent).__name__=='BEB_Agent': bonus=copy.deepcopy(agent.bonus)
-                    if type(agent).__name__=='BEBLP_Agent': bonus=copy.deepcopy(agent.bonus)
-                    if type(agent).__name__=='RmaxLP_Agent': bonus=copy.deepcopy(agent.R)
+                    if type(agent).__name__ in ['Rmax_Agent','RmaxLP_Agent']: bonus=copy.deepcopy(agent.R)
+                    if type(agent).__name__ in ['BEB_Agent','BEBLP_Agent']: bonus=copy.deepcopy(agent.bonus)
                     if type(agent).__name__ in ['BEB_Agent','Rmax_Agent','BEBLP_Agent','RmaxLP_Agent']:
                         img2=picture_world(environment,bonus)
                         pygame.image.save(img2.screen,"Images/Solo/"+type(agent).__name__+"_bonus"+"_"+type(environment).__name__+str(trial)+".png")
-                        merging_two_images(environment,"Images/Solo/"+type(agent).__name__+"_"+type(environment).__name__+"_"+str(trial)+".png","Images/Solo/"+type(agent).__name__+"_bonus"+"_"+type(environment).__name__+str(trial)+".png","Images/"+type(agent).__name__+"_"+type(environment).__name__+" Q_table (left) and bonus (right) "+str(trial)+".png")
+                        merging_two_images(environment,"Images/Solo/"+type(agent).__name__+"_"+type(environment).__name__+"_"+str(trial)+".png",
+                                           "Images/Solo/"+type(agent).__name__+"_bonus"+"_"+type(environment).__name__+str(trial)+".png",
+                                           "Images/"+type(agent).__name__+"_"+type(environment).__name__+" Q_table (left) and bonus (right) "+str(trial)+".png")
 
 def merging_two_images(environment,img1,img2,path):
     pygame.init()
@@ -113,7 +106,6 @@ def normalized_table(table,environment):
 def picture_world(environment,table):       
     max_Q,best_actions=normalized_table(table,environment)
     return Graphique(environment,max_Q,best_actions)
-
 
 
 def plot_VI(environment,gamma,accuracy): #only in gridworlds

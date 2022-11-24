@@ -11,7 +11,7 @@ def choice_dictionary(dictionary):
     return keys[chosen_index]
 
 class Lopes_State():
-    def __init__(self,transitions,rewards,transitions_after_change={}):
+    def __init__(self,transitions,rewards,transitions_after_change=[]):
         self.height = 5
         self.width = 5
         self.grid = np.zeros((self.height,self.width)) 
@@ -21,7 +21,7 @@ class Lopes_State():
         self.actions = [UP, DOWN, LEFT, RIGHT,STAY]
         self.values=rewards
         self.transitions_after_change=transitions_after_change
-        
+        self.rewards=rewards
         self.UP=transitions[UP]
         self.DOWN=transitions[DOWN]
         self.LEFT=transitions[LEFT]
@@ -32,16 +32,16 @@ class Lopes_State():
         self.transitions=transitions
         self.uncertain_states=[(0,1),(0,3),(2,1),(2,3)]
         self.max_exploration=125
-        self.number_steps=0
+        self.total_steps=0
         self.changed=False
         
     def make_step(self, action):
-        self.number_steps+=1
-        if self.transitions_after_change!={} and self.number_steps==900:
-            number_steps=self.number_steps
+        self.total_steps+=1
+        if self.transitions_after_change!=[] and self.total_steps==900:
+            total_steps=self.total_steps
             self.__init__(self.transitions_after_change,self.rewards)
             self.changed=True
-            self.number_steps=number_steps
+            self.total_steps=total_steps
         last_location = self.current_location       
         if action == UP:
             self.current_location = choice_dictionary(self.UP[last_location[0]][last_location[1]])        
