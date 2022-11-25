@@ -4,13 +4,36 @@ import time
 
 ### Parametter fitting ##
 
-example = {'betas':[i for i in range(5)],'priors':[i for i in range(5)]}
 
-def range_parameters_agent(dic):
-    pass
+example = ['beta']+[i for i in range(12)]
+example2 =['test']+[j for j in range(22,33)]
 
-def fitting_Agent(environment_names,nb_iters,agents_parameters,play_parameters):
-    
+def range_parameters_agent(list1,list2):
+    list_of_params=[]
+    for elem1 in range(1,len(list1)) :
+        for elem2 in range(1,len(list2)):
+            list_of_params.append({list1[0]:elem1,list2[0]:elem2})
+    return list_of_params
+    new_dict={{key:value for key,value in dic.items()}}
+    return new_dict
+        
+def main_function() :
+    before=time.time()
+    all_args=[[play_params,every_simulation[seed],all_seeds[seed]] for seed in range(len(all_seeds))]
+    pool = Pool()
+    results=pool.map(fast_loop,all_args)
+    pool.close()
+    pool.join()
+    pol_errors,rewards={},{}
+    for result in results : 
+        pol_errors[result[0]]=result[1][1]
+        rewards[result[0]]=result[1][0]
+    time_after = time.time()
+    print('Computation time: '+str(time_after - before))
+    return pol_errors,rewards
+
+def fitting_Agent(agent_name,environment_names,nb_iters,changing_parameters,play_parameters):
+    pol_error={:[] for beta in betas for prior in priors}
 
 precision_conv=-0.2
 
