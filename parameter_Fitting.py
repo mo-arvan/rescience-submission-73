@@ -4,7 +4,7 @@ import time
 
 ### Parametter fitting ##
 
-
+from multiprocessing import Pool
 example = ['beta']+[i for i in range(12)]
 example2 =['test']+[j for j in range(22,33)]
 
@@ -14,10 +14,9 @@ def range_parameters_agent(list1,list2):
         for elem2 in range(1,len(list2)):
             list_of_params.append({list1[0]:elem1,list2[0]:elem2})
     return list_of_params
-    new_dict={{key:value for key,value in dic.items()}}
-    return new_dict
-        
-def main_function() :
+
+       
+def main_function(all_seeds,play_params,every_simulation) :
     before=time.time()
     all_args=[[play_params,every_simulation[seed],all_seeds[seed]] for seed in range(len(all_seeds))]
     pool = Pool()
@@ -33,7 +32,7 @@ def main_function() :
     return pol_errors,rewards
 
 def fitting_Agent(agent_name,environment_names,nb_iters,changing_parameters,play_parameters):
-    pol_error={:[] for beta in betas for prior in priors}
+    pass
 
 precision_conv=-0.2
 
