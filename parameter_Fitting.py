@@ -1,6 +1,6 @@
 import numpy as np
 import time
-from Useful_functions import play,loading_environments,extracting_results,save_and_plot
+from Useful_functions import play,loading_environments,save_and_plot
 from Lopesworld import Lopes_State
 ### Parametter fitting ##
 
@@ -32,7 +32,6 @@ def get_agent_parameters(basic_parameters,agent,list_1,list_2):
         d=basic_parameters.copy()
         for key,value in dic.items() : 
             d[agent][key]=value
-        print(d)
         agent_parameters.append(d)
     return agent_parameters
 
@@ -49,7 +48,7 @@ def one_parameter_play_function(args):
 
 def main_function(all_seeds,every_simulation,play_params,agent_parameters) :
     before=time.time()
-    all_parameters=[[play_params,every_simulation[seed],all_seeds[seed], agent_parameters[seed]] for seed in range(len(all_seeds))]
+    all_parameters=[[every_simulation[seed],play_params,all_seeds[seed], agent_parameters[seed]] for seed in range(len(all_seeds))]
     pool = Pool()
     results=pool.map(one_parameter_play_function,all_parameters)
     pool.close()
@@ -61,6 +60,20 @@ def main_function(all_seeds,every_simulation,play_params,agent_parameters) :
     time_after = time.time()
     print('Computation time: '+str(time_after - before))
     return pol_errors,rewards
+
+
+def extracting_results(rewards,pol_error,names_environments,agents_tested,number_of_iterations,first_hyperparameters,second_hyperparameters):
+    mean_pol_error_agent={(name_agent,h_1,h_2): np.average([pol_error[name_agent,name_environment,i,h_1,h_2] for i in range(number_of_iterations) for name_environment in names_environments],axis=0)  
+                                                 for name_agent in agents_tested for h_1 in first_hyperparameters for h_2 in first_hyperparameters}
+    CI_pol_error_agent={(name_agent,h_1,h_2):1.96*np.std([pol_error[name_agent,name_environment,i,h_1,h_2] for name_environment in names_environments for i in range(number_of_iterations)],axis=0)/np.sqrt(number_of_iterations*len(names_environments)) 
+                        for name_agent in agents_tested for h_1 in first_hyperparameters for h_2 in second_hyperparameters}
+    rewards_agent={(name_agent,hyperparam1,hyperparam2): np.average([np.average([rewards[name_agent,name_environment,i,hyperparam1,hyperparam2] for i in range(number_of_iterations)],axis=0) for name_environment in names_environments],axis=0) 
+                          for name_agent in agents_tested for hyperparam1 in first_hyperparameters for hyperparam2 in second_hyperparameters}
+    CI_rewards_agent={(name_agent,hyperparam1,hyperparam2):1.96*np.std([rewards[name_agent,name_environment,i,hyperparam1,hyperparam2] for name_environment in names_environments for i in range(number_of_iterations)],axis=0)/np.sqrt(number_of_iterations*len(names_environments)) 
+                        for name_agent in agents_tested for hyperparam1 in first_hyperparameters for hyperparam2 in second_hyperparameters}
+    return mean_pol_error_agent,CI_pol_error_agent, rewards_agent, CI_rewards_agent
+
+#np.average([pol_error[name_agent,name_environment,i,hyperparam1,hyperparam2] for i in range(number_of_iterations) for name_environment in names_environments],axis=0) 
 
 from Rmax import Rmax_Agent
 from BEB import BEB_Agent
@@ -85,8 +98,8 @@ play_params={'trials':100, 'max_step':30, 'screen':False,'photos':[10,20,50,80,9
 
 
 
-example = ['m']+[i for i in range(5)]
-example2 =['u_m']+[j for j in range(22,24)]
+example = ['m']+[1,100]
+example2 =['u_m']+[1,100]
 
 agent_parameters=get_agent_parameters(RA_basic_parameters,agent['RA'],example, example2)
 every_simulation=getting_simulations_to_do(environments,agent,nb_iters,example,example2)
@@ -95,7 +108,7 @@ all_seeds=[i for i in range(len(every_simulation))]
 
 
 pol_errors,rewards=main_function(all_seeds,every_simulation,play_params,agent_parameters)
-pol,CI_pol, reward, CI_reward=extracting_results(rewards,pol_errors,environments,agent,nb_iters)
+pol,CI_pol, reward, CI_reward=extracting_results(rewards,pol_errors,environments,agent,nb_iters,example[1:],example[2:])
 save_and_plot(pol,CI_pol,reward,CI_reward,agent,environments,play_params,environments,agent_parameters)
 
 

@@ -79,11 +79,11 @@ def play_with_params(name_environment,name_agent,agent,iteration,play_parameters
     
 
 def one_parameter_play_function(args):
-    return play_with_params(args[1][0],args[1][1],args[1][2],args[1][3],args[0],args[2],args[3])
+    return play_with_params(args[0][0],args[0][1],args[0][2],args[0][3],args[1],args[2],args[3])
 
 def main_function(all_seeds,every_simulation,play_params,agent_parameters) :
     before=time.time()
-    all_parameters=[[play_params,every_simulation[seed],all_seeds[seed], agent_parameters] for seed in range(len(all_seeds))]
+    all_parameters=[[every_simulation[seed],play_params,all_seeds[seed], agent_parameters] for seed in range(len(all_seeds))]
     pool = Pool()
     results=pool.map(one_parameter_play_function,all_parameters)
     pool.close()
