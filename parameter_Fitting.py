@@ -1,7 +1,7 @@
 import numpy as np
 import time
-from Useful_functions import loading_environments,extracting_results,main_function,getting_simulations_to_do,save_and_plot
-
+from Useful_functions import play,loading_environments,extracting_results,save_and_plot
+from Lopesworld import Lopes_State
 ### Parametter fitting ##
 
 from multiprocessing import Pool
@@ -12,45 +12,44 @@ def range_parameters_agent(list1,list2):
     list_of_params=[]
     for elem1 in range(1,len(list1)) :
         for elem2 in range(1,len(list2)):
-            list_of_params.append({list1[0]:elem1,list2[0]:elem2})
+            list_of_params.append({list1[0]:list1[elem1],list2[0]:list2[elem2]})
     return list_of_params
 
-def get_agent_parameters(basic_parameters,list_1,list_2):
+def getting_simulations_to_do(names_environments,agents_tested,number_of_iterations,values_first_hyperparameter,values_second_hyperparameter):
+    every_simulation=[]
+    for name_environment in names_environments:   
+        for name_agent,agent in agents_tested.items(): 
+            for iteration in range(number_of_iterations):
+                for hyperparameter_1 in values_first_hyperparameter[1:] : 
+                    for hyperparameter_2 in values_second_hyperparameter[1:] :
+                        every_simulation.append((name_environment,name_agent,agent,iteration,hyperparameter_1,hyperparameter_2))
+    return every_simulation
+
+def get_agent_parameters(basic_parameters,agent,list_1,list_2):
     agent_parameters=[]
     list_of_new_parameters=range_parameters_agent(list_1, list_2)
     for dic in list_of_new_parameters:
         d=basic_parameters.copy()
         for key,value in dic.items() : 
-            d[key]=value
+            d[agent][key]=value
+        print(d)
         agent_parameters.append(d)
     return agent_parameters
 
+environment_parameters=loading_environments()
 
-def play_with_params(agent_name,environment_names,nb_iters,changing_parameters,play_parameters,seeds):
+def play_with_params(name_environment,name_agent,agent,iteration,first_hyperparameter,second_hyperparameter,play_parameters,seed,agent_parameters):
     np.random.seed(seed)
     environment=Lopes_State(**environment_parameters[name_environment])
     globals()[name_agent]=agent(environment,**agent_parameters[agent])
-    return (name_agent,name_environment,iteration),play(environment,globals()[name_agent],**play_parameters)
-    
-    BEB_parameters={(beta,prior):{'gamma':0.95,'beta':beta,'known_states':True,'coeff_prior':prior,'informative':informative} for beta in betas for prior in priors}
-    pol_error={(beta,prior):[] for beta in betas for prior in priors}
-    for name_environment in environment_names:   
-        print(name_environment)
-        environment=all_environments[name_environment](**environments_parameters[name_environment])                
-        for beta in betas :
-            print(beta)
-            for prior in priors :
-                BEB=BEB_Agent(environment,**BEB_parameters[(beta,prior)]) #Defining a new agent from the dictionary agents
-                
-                _,step_number,policy_value_error= play(environment,BEB,trials=trials,max_step=max_step,screen=screen,accuracy=accuracy,pas_VI=pas_VI) #Playing in environment
-                pol_error[beta,prior].append(policy_value_error)
+    return (name_agent,name_environment,iteration,first_hyperparameter,second_hyperparameter),play(environment,globals()[name_agent],**play_parameters)
 
 def one_parameter_play_function(args):
-    return play_with_params(args[1][0],args[1][1],args[1][2],args[1][3],args[0],args[2],args[3])
+    return play_with_params(args[0][0],args[0][1],args[0][2],args[0][3],args[0][4],args[0][5],args[1],args[2],args[3])
 
 def main_function(all_seeds,every_simulation,play_params,agent_parameters) :
     before=time.time()
-    all_parameters=[[play_params,every_simulation[seed],all_seeds[seed], agent_parameters] for seed in range(len(all_seeds))]
+    all_parameters=[[play_params,every_simulation[seed],all_seeds[seed], agent_parameters[seed]] for seed in range(len(all_seeds))]
     pool = Pool()
     results=pool.map(one_parameter_play_function,all_parameters)
     pool.close()
@@ -63,7 +62,46 @@ def main_function(all_seeds,every_simulation,play_params,agent_parameters) :
     print('Computation time: '+str(time_after - before))
     return pol_errors,rewards
 
+from Rmax import Rmax_Agent
+from BEB import BEB_Agent
+from greedyMB import Epsilon_MB_Agent
+from BEBLP import BEBLP_Agent
+from RmaxLP import RmaxLP_Agent
 
+environments_parameters=loading_environments()
+
+
+#First experiment
+
+RA_basic_parameters={Rmax_Agent:{'gamma':0.95, 'm':8,'Rmax':1,'u_m':15,'correct_prior':True}}
+
+#environments=["Non_stat_article_-1_{0}".format(world)+'_{0}'.format(non_stat) for world in range(1,11) for non_stat in range(1,11)]
+environments=["Lopes"]
+#agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
+agent={'RA':Rmax_Agent}
+nb_iters=1
+
+play_params={'trials':100, 'max_step':30, 'screen':False,'photos':[10,20,50,80,99],'accuracy_VI':0.01,'step_between_VI':50}
+
+
+
+example = ['m']+[i for i in range(5)]
+example2 =['u_m']+[j for j in range(22,24)]
+
+agent_parameters=get_agent_parameters(RA_basic_parameters,agent['RA'],example, example2)
+every_simulation=getting_simulations_to_do(environments,agent,nb_iters,example,example2)
+all_seeds=[i for i in range(len(every_simulation))]
+
+
+
+pol_errors,rewards=main_function(all_seeds,every_simulation,play_params,agent_parameters)
+pol,CI_pol, reward, CI_reward=extracting_results(rewards,pol_errors,environments,agent,nb_iters)
+save_and_plot(pol,CI_pol,reward,CI_reward,agent,environments,play_params,environments,agent_parameters)
+
+
+
+
+"""
 def fitting_Agent(agent_name,environment_names,nb_iters,changing_parameters,play_parameters,seeds):
     main_function(all_seeds,every_simulation,play_params,agent_parameters)
     BEB_parameters={(beta,prior):{'gamma':0.95,'beta':beta,'known_states':True,'coeff_prior':prior,'informative':informative} for beta in betas for prior in priors}
@@ -203,7 +241,7 @@ colors_6=['tab:blue','tab:orange','tab:green','tab:red','tab:purple','tab:brown'
 markers=['^','o','x','*','s','P','.','D','1','v',',']
 
 #E-GREEDY 
-
+"""
 """
 epsilons=[0.005,0.1,0.2,0.5,0.8,1]
 a,conv_a=fitting_QMB(environment_names,epsilons,pas_VI=pas_VI,accuracy=accuracy,trials=trials,max_step=max_step)
