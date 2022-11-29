@@ -69,8 +69,9 @@ def play(environment, agent, trials=100, max_step=30, screen=False,photos=[10,20
         reward_per_episode.append(cumulative_reward)
     return reward_per_episode,policy_value_error
 
+environment_parameters=loading_environments()
 
-def play_with_params(name_environment,name_agent,agent,iteration,play_parameters,seed,environment_parameters,agent_parameters):
+def play_with_params(name_environment,name_agent,agent,iteration,play_parameters,seed,agent_parameters):
     np.random.seed(seed)
     environment=Lopes_State(**environment_parameters[name_environment])
     globals()[name_agent]=agent(environment,**agent_parameters[agent])
@@ -78,13 +79,13 @@ def play_with_params(name_environment,name_agent,agent,iteration,play_parameters
     
 
 def one_parameter_play_function(args):
-    return play_with_params(args[1][0],args[1][1],args[1][2],args[1][3],args[0],args[2])
+    return play_with_params(args[1][0],args[1][1],args[1][2],args[1][3],args[0],args[2],args[3])
 
-def main_function(all_seeds,every_simulation,play_params) :
+def main_function(all_seeds,every_simulation,play_params,agent_parameters) :
     before=time.time()
-    all_args=[[play_params,every_simulation[seed],all_seeds[seed]] for seed in range(len(all_seeds))]
+    all_parameters=[[play_params,every_simulation[seed],all_seeds[seed], agent_parameters] for seed in range(len(all_seeds))]
     pool = Pool()
-    results=pool.map(one_parameter_play_function,all_args)
+    results=pool.map(one_parameter_play_function,all_parameters)
     pool.close()
     pool.join()
     pol_errors,rewards={},{}
@@ -124,9 +125,9 @@ def save_and_plot(pol,CI_pol,reward,CI_reward,agents_tested,names_environments,p
         yerr0 = pol[name_agent] - CI_pol[name_agent]
         yerr1 = pol[name_agent] + CI_pol[name_agent]
 
-        plt.fill_between([play_parameters['pas_VI']*i for i in range(len(pol[name_agent]))], yerr0, yerr1, color=colors[name_agent], alpha=0.2)
+        plt.fill_between([play_parameters['step_between_VI']*i for i in range(len(pol[name_agent]))], yerr0, yerr1, color=colors[name_agent], alpha=0.2)
 
-        plt.plot([play_parameters['pas_VI']*i for i in range(len(pol[name_agent]))],pol[name_agent],color=colors[name_agent],linewidth=linewidths[name_agent],
+        plt.plot([play_parameters['step_between_VI']*i for i in range(len(pol[name_agent]))],pol[name_agent],color=colors[name_agent],linewidth=linewidths[name_agent],
                      label=rename[name_agent],ms=marker_sizes[name_agent],marker=markers[name_agent])
     plt.xlabel("Steps")
     plt.ylabel("Policy value error")
@@ -153,6 +154,8 @@ def save_and_plot(pol,CI_pol,reward,CI_reward,agents_tested,names_environments,p
     plt.legend()
     plt.savefig('Results/Rewards'+time_end+names_environments[0]+'.png')
     plt.show()
+
+
 
 
 
@@ -241,8 +244,6 @@ def open_pickle(path):
 ##### EXTRACTING RESULTS ####
 
 
-def extracting_results(results):
-    pass
 
 ######## VISUALISATION ########
 

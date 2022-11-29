@@ -1,12 +1,12 @@
 import numpy as np
 import time
-
+from Useful_functions import loading_environments,extracting_results,main_function,getting_simulations_to_do,save_and_plot
 
 ### Parametter fitting ##
 
 from multiprocessing import Pool
 example = ['beta']+[i for i in range(12)]
-example2 =['test']+[j for j in range(22,33)]
+example2 =['coeff_prior']+[j for j in range(22,33)]
 
 def range_parameters_agent(list1,list2):
     list_of_params=[]
@@ -15,12 +15,44 @@ def range_parameters_agent(list1,list2):
             list_of_params.append({list1[0]:elem1,list2[0]:elem2})
     return list_of_params
 
-       
-def main_function(all_seeds,play_params,every_simulation) :
+def get_agent_parameters(basic_parameters,list_1,list_2):
+    agent_parameters=[]
+    list_of_new_parameters=range_parameters_agent(list_1, list_2)
+    for dic in list_of_new_parameters:
+        d=basic_parameters.copy()
+        for key,value in dic.items() : 
+            d[key]=value
+        agent_parameters.append(d)
+    return agent_parameters
+
+
+def play_with_params(agent_name,environment_names,nb_iters,changing_parameters,play_parameters,seeds):
+    np.random.seed(seed)
+    environment=Lopes_State(**environment_parameters[name_environment])
+    globals()[name_agent]=agent(environment,**agent_parameters[agent])
+    return (name_agent,name_environment,iteration),play(environment,globals()[name_agent],**play_parameters)
+    
+    BEB_parameters={(beta,prior):{'gamma':0.95,'beta':beta,'known_states':True,'coeff_prior':prior,'informative':informative} for beta in betas for prior in priors}
+    pol_error={(beta,prior):[] for beta in betas for prior in priors}
+    for name_environment in environment_names:   
+        print(name_environment)
+        environment=all_environments[name_environment](**environments_parameters[name_environment])                
+        for beta in betas :
+            print(beta)
+            for prior in priors :
+                BEB=BEB_Agent(environment,**BEB_parameters[(beta,prior)]) #Defining a new agent from the dictionary agents
+                
+                _,step_number,policy_value_error= play(environment,BEB,trials=trials,max_step=max_step,screen=screen,accuracy=accuracy,pas_VI=pas_VI) #Playing in environment
+                pol_error[beta,prior].append(policy_value_error)
+
+def one_parameter_play_function(args):
+    return play_with_params(args[1][0],args[1][1],args[1][2],args[1][3],args[0],args[2],args[3])
+
+def main_function(all_seeds,every_simulation,play_params,agent_parameters) :
     before=time.time()
-    all_args=[[play_params,every_simulation[seed],all_seeds[seed]] for seed in range(len(all_seeds))]
+    all_parameters=[[play_params,every_simulation[seed],all_seeds[seed], agent_parameters] for seed in range(len(all_seeds))]
     pool = Pool()
-    results=pool.map(fast_loop,all_args)
+    results=pool.map(one_parameter_play_function,all_parameters)
     pool.close()
     pool.join()
     pol_errors,rewards={},{}
@@ -31,9 +63,21 @@ def main_function(all_seeds,play_params,every_simulation) :
     print('Computation time: '+str(time_after - before))
     return pol_errors,rewards
 
-def fitting_Agent(agent_name,environment_names,nb_iters,changing_parameters,play_parameters):
-    pass
 
+def fitting_Agent(agent_name,environment_names,nb_iters,changing_parameters,play_parameters,seeds):
+    main_function(all_seeds,every_simulation,play_params,agent_parameters)
+    BEB_parameters={(beta,prior):{'gamma':0.95,'beta':beta,'known_states':True,'coeff_prior':prior,'informative':informative} for beta in betas for prior in priors}
+    pol_error={(beta,prior):[] for beta in betas for prior in priors}
+    for name_environment in environment_names:   
+        print(name_environment)
+        environment=all_environments[name_environment](**environments_parameters[name_environment])                
+        for beta in betas :
+            print(beta)
+            for prior in priors :
+                BEB=BEB_Agent(environment,**BEB_parameters[(beta,prior)]) #Defining a new agent from the dictionary agents
+                
+                _,step_number,policy_value_error= play(environment,BEB,trials=trials,max_step=max_step,screen=screen,accuracy=accuracy,pas_VI=pas_VI) #Playing in environment
+                pol_error[beta,prior].append(policy_value_error)
 precision_conv=-0.2
 
 def fitting_BEB(environment_names,betas,priors,trials = 300,max_step = 30,accuracy=0.05,screen=0,pas_VI=25,informative=True):
