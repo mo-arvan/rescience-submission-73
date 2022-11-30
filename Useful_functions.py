@@ -99,9 +99,9 @@ def main_function(all_seeds,every_simulation,play_params,agent_parameters) :
 ### Extracting results ###
 
 def extracting_results(rewards,pol_error,names_environments,agents_tested,number_of_iterations):
-    mean_pol_error_agent={name_agent: np.average([np.average([pol_error[name_agent,name_environment,i] for i in range(number_of_iterations)],axis=0) for name_environment in names_environments],axis=0) for name_agent in agents_tested}
+    mean_pol_error_agent={name_agent: np.average([pol_error[name_agent,name_environment,i] for i in range(number_of_iterations) for name_environment in names_environments],axis=0) for name_agent in agents_tested}
     CI_pol_error_agent={name_agent:1.96*np.std([pol_error[name_agent,name_environment,i] for name_environment in names_environments for i in range(number_of_iterations)],axis=0)/np.sqrt(number_of_iterations*len(names_environments)) for name_agent in agents_tested}
-    rewards_agent={name_agent: np.average([np.average([rewards[name_agent,name_environment,i] for i in range(number_of_iterations)],axis=0) for name_environment in names_environments],axis=0) for name_agent in agents_tested}
+    rewards_agent={name_agent: np.average([rewards[name_agent,name_environment,i] for i in range(number_of_iterations) for name_environment in names_environments],axis=0) for name_agent in agents_tested}
     CI_rewards_agent={name_agent:1.96*np.std([rewards[name_agent,name_environment,i] for name_environment in names_environments for i in range(number_of_iterations)],axis=0)/np.sqrt(number_of_iterations*len(names_environments)) for name_agent in agents_tested}
     return mean_pol_error_agent,CI_pol_error_agent, rewards_agent, CI_rewards_agent
 
@@ -115,19 +115,18 @@ def save_and_plot(pol,CI_pol,reward,CI_reward,agents_tested,names_environments,p
     
     rename={'RA':'R-max','BEB':'BEB','BEBLP':'ζ-EB','RALP':'ζ-R-max','Epsilon_MB':'Ɛ-greedy'}
     colors={'RA':'#9d02d7','RALP':'#0000ff','Epsilon_MB':"#ff7763",'BEB':"#ffac1e",'BEBLP':"#009435"}
-    linewidths={'RA':'0.75','RALP':'1.25','BEB':'0.75','BEBLP':'1.25','Epsilon_MB':'0.75'}
     marker_sizes={'RA':'3','RALP':'3','BEB':'3','BEBLP':'3','Epsilon_MB':'3'}
     
     markers={'RA':'^','RALP':'o','BEB':'x','BEBLP':'*','Epsilon_MB':'s'}
     fig=plt.figure(dpi=300)
-    ax = fig.add_subplot(1, 1, 1)
+    fig.add_subplot(1, 1, 1)
     for name_agent in agents_tested.keys():
         yerr0 = pol[name_agent] - CI_pol[name_agent]
         yerr1 = pol[name_agent] + CI_pol[name_agent]
 
         plt.fill_between([play_parameters['step_between_VI']*i for i in range(len(pol[name_agent]))], yerr0, yerr1, color=colors[name_agent], alpha=0.2)
 
-        plt.plot([play_parameters['step_between_VI']*i for i in range(len(pol[name_agent]))],pol[name_agent],color=colors[name_agent],linewidth=linewidths[name_agent],
+        plt.plot([play_parameters['step_between_VI']*i for i in range(len(pol[name_agent]))],pol[name_agent],color=colors[name_agent],
                      label=rename[name_agent],ms=marker_sizes[name_agent],marker=markers[name_agent])
     plt.xlabel("Steps")
     plt.ylabel("Policy value error")
@@ -138,7 +137,7 @@ def save_and_plot(pol,CI_pol,reward,CI_reward,agents_tested,names_environments,p
     plt.show()
 
     fig_reward=plt.figure(dpi=300)
-    ax_reward=fig_reward.add_subplot(1,1,1)
+    fig_reward.add_subplot(1,1,1)
     for name_agent in agents_tested.keys():
         yerr0 = reward[name_agent] - CI_reward[name_agent]
         yerr1 = reward[name_agent] + CI_reward[name_agent]
@@ -146,8 +145,7 @@ def save_and_plot(pol,CI_pol,reward,CI_reward,agents_tested,names_environments,p
         plt.fill_between([i+1 for i in range(play_parameters['trials'])], yerr0, yerr1, color=colors[name_agent], alpha=0.2)
         
         plt.plot([i+1 for i in range(play_parameters['trials'])],reward[name_agent], 
-                     color=colors[name_agent],linewidth=linewidths[name_agent],
-                     label=rename[name_agent],ms=marker_sizes[name_agent],marker=markers[name_agent])
+                     color=colors[name_agent],label=rename[name_agent],ms=marker_sizes[name_agent],marker=markers[name_agent])
     plt.xlabel("Trials")
     plt.ylabel("Reward")
     plt.grid(linestyle='--')
