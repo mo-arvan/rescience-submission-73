@@ -1,8 +1,10 @@
 import numpy as np
 import time
-from Useful_functions import play,loading_environments,save_and_plot
+from Useful_functions import play,loading_environments
 from Lopesworld import Lopes_State
 import matplotlib.pyplot as plt
+import seaborn as sns
+import copy
 ### Parametter fitting ##
 
 from multiprocessing import Pool
@@ -30,7 +32,7 @@ def get_agent_parameters(basic_parameters,agent,list_1,list_2):
     agent_parameters=[]
     list_of_new_parameters=range_parameters_agent(list_1, list_2)
     for dic in list_of_new_parameters:
-        d=basic_parameters.copy()
+        d=copy.deepcopy(basic_parameters)
         for key,value in dic.items() : 
             d[agent][key]=value
         agent_parameters.append(d)
@@ -76,18 +78,39 @@ def extracting_results(rewards,pol_error,names_environments,agents_tested,number
 
 
 def get_best_performance(pol_error_parameter):
-    return {(name_agent,hp_1,hp_2):np.average(pol_error_value[:-20]) for (name_agent,hp_1,hp_2),pol_error_value in pol_error_parameter.items()}
+    return {(name_agent,hp_1,hp_2):np.average(pol_error_value[-20:]) for (name_agent,hp_1,hp_2),pol_error_value in pol_error_parameter.items()}
 
 def plot_parametter_fitting(pol,CI_pol,reward,CI_reward,name_agent,first_hyperparameters,second_hyperparameters,play_parameters,name_environments):
     time_end=str(round(time.time()%1e7))
-    markers=['^','o','x','*','s','P','.','D','1','v',',']
-    colors=['tab:blue','tab:orange','tab:green','tab:red','tab:purple','tab:brown']
     np.save('Results/'+time_end+name_environments[0]+'_polerror.npy',pol)
     rename={'RA':'R-max','BEB':'BEB','BEBLP':'ζ-EB','RALP':'ζ-R-max','Epsilon_MB':'Ɛ-greedy'}
+    
+    
     fig=plt.figure(dpi=300)
     fig.add_subplot(1, 1, 1)
+    avg_pol_last_1000_steps=get_best_performance(pol)
+    array_result=np.zeros((len(first_hyperparameters)-1,len(second_hyperparameters)-1))
+    for index_hp_1,hp_1 in enumerate(first_hyperparameters[1:]) :
+        for index_hp_2,hp_2 in enumerate(second_hyperparameters[1:]) :
+            array_result[(index_hp_1,index_hp_2)]=avg_pol_last_1000_steps[name_agent,hp_1,hp_2]
+    
+    array_result[array_result < np.median(array_result)] = np.median(array_result)
+    plt.figure()
+    sns.heatmap(array_result,cmap='bwr')
+    plt.xlabel(second_hyperparameters[0])
+    plt.ylabel(first_hyperparameters[0])
+    plt.xticks([i+0.5 for i in range(len(second_hyperparameters[1:]))],second_hyperparameters[1:])
+    plt.yticks([i+0.5 for i in range(len(first_hyperparameters[1:]))],first_hyperparameters[1:])
+    plt.title('Mean policy value error on the last 1000 steps')
+    plt.savefig('Parameter fitting/heatmap'+name_agent+name_environments[0]+time_end+'.png')
+    plt.show()
+    
+    markers=['^','o','x','*','s','P','.','D','1','v',',','^','o','x','*','s']*3
+    colors=['tab:blue','tab:orange','tab:green','tab:red','tab:purple','tab:brown']*3
     count=0
     for hp_1 in first_hyperparameters[1:] :
+        fig=plt.figure(dpi=300)
+        fig.add_subplot(1, 1, 1)
         for hp_2 in second_hyperparameters[1:] :
             yerr0 = pol[name_agent,hp_1,hp_2] - CI_pol[name_agent,hp_1,hp_2]
             yerr1 = pol[name_agent,hp_1,hp_2] + CI_pol[name_agent,hp_1,hp_2]
@@ -95,7 +118,7 @@ def plot_parametter_fitting(pol,CI_pol,reward,CI_reward,name_agent,first_hyperpa
             plt.fill_between([play_parameters['step_between_VI']*i for i in range(len(pol[name_agent,hp_1,hp_2]))], yerr0, yerr1, color=colors[count], alpha=0.2)
 
             plt.plot([play_parameters['step_between_VI']*i for i in range(len(pol[name_agent,hp_1,hp_2]))],pol[name_agent,hp_1,hp_2],color=colors[count],
-                     label=str(second_hyperparameters[0])+"="+str(hp_2),ms=3,marker=markers[count])
+                     label=str(second_hyperparameters[0])+"="+str(hp_2),ms=4,marker=markers[count])
             count+=1
         count=0
         plt.xlabel("Steps")
@@ -104,23 +127,9 @@ def plot_parametter_fitting(pol,CI_pol,reward,CI_reward,name_agent,first_hyperpa
         plt.grid(linestyle='--')
         plt.ylim([-12.5,0.5])
         plt.legend()
-        plt.savefig('Results/pol_error'+name_agent+name_environments[0]+time_end+'.png')
+        plt.savefig('Parameter fitting/pol_error'+name_agent+name_environments[0]+time_end+'.png')
         plt.show()
-        
     
-    ser = pd.Series(list(conv_g.values()),
-                      index=pd.MultiIndex.from_tuples(conv_g.keys()))
-    df = ser.unstack().fillna(0)
-    df.shape
-    plt.figure()
-    ax=sns.heatmap(df,cmap='Blues')
-    plt.xlabel('beta')
-    plt.ylabel('alpha')
-    plt.title('Pas de convergence PIM')
-    plt.savefig('Parameter fitting 2/PIM_heatmap'+environment_names[0]+temps+'.png')
-    plt.show()
-
-
 
 
 
@@ -150,11 +159,11 @@ play_params={'trials':100, 'max_step':30, 'screen':False,'photos':[10,20,50,80,9
 
 
 
-example = ['m']+[1,3,5,10]
-example2 =['u_m']+[1,3,5,10]
+example = ['m']+[i for i in range(2,12)]
+example2 =['u_m']+[i for i in range(2,17)]
 
 every_simulation=getting_simulations_to_do(environments,agent,nb_iters,example,example2)
-all_seeds=[i for i in range(len(every_simulation))]
+all_seeds=[1000+i for i in range(len(every_simulation))]
 agent_parameters=nb_iters*get_agent_parameters(RA_basic_parameters,agent['RA'],example, example2)
 
 

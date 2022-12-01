@@ -13,7 +13,7 @@ from RmaxLP import RmaxLP_Agent
 environments_parameters=loading_environments()
 
 
-#First experiment
+#Reproduction of the first figure of Lopes et al. (2012)
 
 agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.2},
             Rmax_Agent:{'gamma':0.95, 'm':8,'Rmax':1,'u_m':15,'correct_prior':True},
@@ -37,6 +37,19 @@ all_seeds=[i for i in range(len(every_simulation))]
 pol_errors,rewards=main_function(all_seeds,every_simulation,play_params,agent_parameters)
 pol,CI_pol, reward, CI_reward=extracting_results(rewards,pol_errors,environments,agents,nb_iters)
 save_and_plot(pol,CI_pol,reward,CI_reward,agents,environments,play_params,environments,agent_parameters)
+
+#Reproduction of the second figure of Lopes et al. (2012)
+
+
+#Reproduction of the third figure of Lopes et al. (2012)
+
+#Stronger non-stationarity to find the same third figure as Lopes et al. (2012)
+
+#Replication of the first figure of Lopes et al. (2012) with a negative reward of -1
+
+#Replication of the third figure of Lopes et al. (2012) with a negative reward of -1
+
+#Stronger non-stationarity than Lopes et al. (2012) with a negative reward of -1
 
 
 

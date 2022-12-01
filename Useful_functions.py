@@ -155,8 +155,6 @@ def save_and_plot(pol,CI_pol,reward,CI_reward,agents_tested,names_environments,p
 
 
 
-
-
 ### PICTURES ###
 
 def take_picture(agent,trial,environment,photos):
@@ -239,42 +237,7 @@ def open_pickle(path):
     with open(path, 'rb') as file:
         return pickle.load(file)
 
-##### EXTRACTING RESULTS ####
 
-
-
-######## VISUALISATION ########
-
-def convert_from_default(dic):
-    from collections import defaultdict
-    if isinstance(dic,defaultdict):
-        return dict((key,convert_from_default(value)) for key,value in dic.items())
-    else : return dic
-
-
-def plot3D(table_3D,x_name='beta',y_name='gamma'):
-    dataframe=pd.DataFrame({x_name:table_3D[:,0], y_name:table_3D[:,1], 'values':table_3D[:,2]})
-    data_pivoted = dataframe.pivot(x_name, y_name, "values")
-    sns.heatmap(data_pivoted,cmap='Blues')
-
-
-####### GET STATS #####
-
-def convergence(array,longueur=30,variation=0.2,absolu=0.1,artefact=3):
-    for i in range(len(array)-longueur):
-        table=array[i:i+longueur]
-        mean=np.mean(table)
-        if mean >0:
-            mauvais=0
-            valid=True
-            for element in table : 
-                if element < (1-variation)*mean-absolu>element or element > (1+variation)*mean+absolu:
-                    mauvais+=1
-                    if mauvais > artefact:
-                        valid=False
-            if valid : 
-                return [len(array)-len(array[i+1:]),np.mean(array[i+1:]),np.var(array[i+1:])]            
-    return [len(array)-1,np.mean(array),np.var(array)]
 
     
 
