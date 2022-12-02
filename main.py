@@ -16,7 +16,7 @@ environments_parameters=loading_environments()
 #Reproduction of the first figure of Lopes et al. (2012)
 
 agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.2},
-            Rmax_Agent:{'gamma':0.95, 'm':8,'Rmax':1,'u_m':15,'correct_prior':True},
+            Rmax_Agent:{'gamma':0.95, 'm':8,'Rmax':1,'m_uncertain_states':15,'correct_prior':True},
             BEB_Agent:{'gamma':0.95,'beta':3,'correct_prior':True,'coeff_prior':0.001,'informative':False},
             BEBLP_Agent:{'gamma':0.95,'beta':2.4,'step_update':10,'coeff_prior':0.001,'alpha':0.4},
             RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'alpha':0.3,'m':2}}
