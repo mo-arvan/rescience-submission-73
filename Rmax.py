@@ -4,14 +4,14 @@ from collections import defaultdict
 
 class Rmax_Agent:
 
-    def __init__(self,environment, gamma=0.95, m=5,Rmax=200,u_m=2,correct_prior=True):
+    def __init__(self,environment, gamma=0.95, m=5,Rmax=200,m_uncertain_states=2,correct_prior=True):
         
         self.Rmax=Rmax
         
         self.environment=environment
         self.gamma = gamma
         self.m = m
-        self.u_m=u_m
+        self.m_uncertain_states=m_uncertain_states
         
         self.R = defaultdict(lambda: defaultdict(lambda: 0.0))
         self.Rsum=defaultdict(lambda: defaultdict(lambda: 0.0))
@@ -77,11 +77,11 @@ class Rmax_Agent:
                     self.tSAS[state_1][action][state_2]=1/len(self.states)
         for state in self.environment.uncertain_states:
             for action in self.environment.actions:
-                self.max_visits[state][action]=self.u_m
+                self.max_visits[state][action]=self.m_uncertain_states
         if not self.correct_prior : self.wrong_prior()
     
     def wrong_prior(self):#Below is the wrong prior version
         for state in self.environment.states:
             for action in self.environment.actions:
-                self.max_visits[state][action]=np.random.randint(self.m,self.u_m)
+                self.max_visits[state][action]=np.random.randint(self.m,self.m_uncertain_states)
         
