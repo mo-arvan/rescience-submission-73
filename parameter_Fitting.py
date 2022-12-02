@@ -5,11 +5,12 @@ from Lopesworld import Lopes_State
 import matplotlib.pyplot as plt
 import seaborn as sns
 import copy
-### Parametter fitting ##
+
+
+### Parameter fitting ##
 
 from multiprocessing import Pool
-example = ['beta']+[i for i in range(12)]
-example2 =['coeff_prior']+[j for j in range(22,33)]
+
 
 def range_parameters_agent(list1,list2):
     list_of_params=[]
@@ -80,9 +81,9 @@ def extracting_results(rewards,pol_error,names_environments,agents_tested,number
 def get_best_performance(pol_error_parameter):
     return {(name_agent,hp_1,hp_2):np.average(pol_error_value[-20:]) for (name_agent,hp_1,hp_2),pol_error_value in pol_error_parameter.items()}
 
-def plot_parametter_fitting(pol,CI_pol,reward,CI_reward,name_agent,first_hyperparameters,second_hyperparameters,play_parameters,name_environments):
+def plot_parameter_fitting(pol,CI_pol,reward,CI_reward,name_agent,first_hyperparameters,second_hyperparameters,play_parameters,name_environments):
     time_end=str(round(time.time()%1e7))
-    np.save('Results/'+time_end+name_environments[0]+'_polerror.npy',pol)
+    np.save('Parameter fitting/'+time_end+'_'+name_environments[0]+'_'+name_agent+'_polerror.npy',pol)
     rename={'RA':'R-max','BEB':'BEB','BEBLP':'ζ-EB','RALP':'ζ-R-max','Epsilon_MB':'Ɛ-greedy'}
     
     
@@ -131,6 +132,16 @@ def plot_parametter_fitting(pol,CI_pol,reward,CI_reward,name_agent,first_hyperpa
         plt.show()
     
 
+def fit_parameters_agent(environments,agent,agent_name,nb_iters,first_hp,second_hp,agent_basic_parameters,starting_seed,play_parameters):
+    
+    every_simulation=getting_simulations_to_do(environments,agent,nb_iters,first_hp,second_hp)
+    seeds_agent=[starting_seed+i for i in range(len(every_simulation))]
+    agent_parameters=nb_iters*get_agent_parameters(agent_basic_parameters,agent[agent_name],first_hp, second_hp)
+
+    pol_errors,rewards=main_function(seeds_agent,every_simulation,play_parameters,agent_parameters)
+    pol,CI_pol, reward, CI_reward=extracting_results(rewards,pol_errors,environments,agent,nb_iters,first_hp[1:],second_hp[1:])
+    plot_parameter_fitting(pol,CI_pol,reward,CI_reward,agent_name,first_hp,second_hp,play_parameters,environments)
+
 
 
 from Rmax import Rmax_Agent
@@ -140,36 +151,57 @@ from BEBLP import BEBLP_Agent
 from RmaxLP import RmaxLP_Agent
 
 
-
+# Parameter fitting for each agent #
 
 environments_parameters=loading_environments()
-
-
-#First experiment
-
-RA_basic_parameters={Rmax_Agent:{'gamma':0.95, 'm':8,'Rmax':1,'u_m':15,'correct_prior':True}}
-
-#environments=["Non_stat_article_-1_{0}".format(world)+'_{0}'.format(non_stat) for world in range(1,11) for non_stat in range(1,11)]
+play_params={'trials':100, 'max_step':30, 'screen':False,'photos':[10,20,50,80,99],'accuracy_VI':0.01,'step_between_VI':50}
 environments=["Lopes"]
-#agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
-agent={'RA':Rmax_Agent}
 nb_iters=1
 
-play_params={'trials':100, 'max_step':30, 'screen':False,'photos':[10,20,50,80,99],'accuracy_VI':0.01,'step_between_VI':50}
+
+#Reproduction of Lopes et al. (2012)
+
+#R-max
+agent_RA={'RA':Rmax_Agent}
+RA_basic_parameters={Rmax_Agent:{'gamma':0.95,'Rmax':1,'m':8,'m_uncertain_states':15,'correct_prior':True}}
+
+#agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
 
 
+first_hp_RA= ['m']+[i for i in range(1,2)]
+second_hp_RA=['m_uncertain_states']+[i for i in range(1,2)]
 
-example = ['m']+[i for i in range(2,12)]
-example2 =['u_m']+[i for i in range(2,17)]
-
-every_simulation=getting_simulations_to_do(environments,agent,nb_iters,example,example2)
-all_seeds=[1000+i for i in range(len(every_simulation))]
-agent_parameters=nb_iters*get_agent_parameters(RA_basic_parameters,agent['RA'],example, example2)
+every_simulation_RA=getting_simulations_to_do(environments,agent_RA,nb_iters,first_hp_RA,second_hp_RA)
+seeds_RA=[1000+i for i in range(len(every_simulation_RA))]
+agent_parameters=nb_iters*get_agent_parameters(RA_basic_parameters,agent_RA['RA'],first_hp_RA, second_hp_RA)
 
 
-pol_errors,rewards=main_function(all_seeds,every_simulation,play_params,agent_parameters)
-pol,CI_pol, reward, CI_reward=extracting_results(rewards,pol_errors,environments,agent,nb_iters,example[1:],example2[1:])
-plot_parametter_fitting(pol,CI_pol,reward,CI_reward,'RA',example,example2,play_params,environments)
+pol_errors,rewards=main_function(seeds_RA,every_simulation_RA,play_params,agent_parameters)
+pol,CI_pol, reward, CI_reward=extracting_results(rewards,pol_errors,environments,agent_RA,nb_iters,first_hp_RA[1:],second_hp_RA[1:])
+plot_parameter_fitting(pol,CI_pol,reward,CI_reward,'RA',first_hp_RA,second_hp_RA,play_params,environments)
+
+#R-max learning progress
+
+agent_RALP={'RALP':RmaxLP_Agent}
+RALP_basic_parameters={RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'m':2,'alpha':0.3}}
+first_hp_RALP= ['m']+[i for i in range(1,3)]
+second_hp_RALP=['alpha']+[0.1*i for i in range(1,3)]
+starting_seed=1000
+
+fit_parameters_agent(environments,agent_RALP,'RALP',nb_iters,first_hp_RALP,second_hp_RALP,RALP_basic_parameters,starting_seed,play_params)
+
+#BEB 
+
+agent_BEB={'BEB':BEB_Agent}
+BEB_basic_parameters={BEB_Agent:{'gamma':0.95,'beta':3,'coeff_prior':0.001,'correct_prior':True,'informative':False}}
+#agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
+
+
+first_hp_BEB= ['beta']+[i for i in range(1,3)]
+second_hp_BEB=['coeff_prior']+[0.1*i for i in range(1,3)]
+starting_seed=1000
+
+fit_parameters_agent(environments,agent_BEB,'BEB',nb_iters,first_hp_BEB,second_hp_BEB,BEB_basic_parameters,starting_seed,play_params)
 
 
 
