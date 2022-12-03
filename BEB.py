@@ -83,8 +83,6 @@ class BEB_Agent:
         for state_1 in self.states:
             for action in self.environment.actions:
                 if self.informative :
-                    """for state_2 in self.environment.transitions[action][state_1].keys(): 
-                        self.prior[state_1][action][state_2]=self.coeff_prior"""
                     prior_transitions=self.environment.transitions[action][state_1].copy()
                     prior_coeff_transitions={k:self.coeff_prior*1e-5 for k in self.states}
                     for k,v in prior_transitions.items():

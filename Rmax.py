@@ -80,7 +80,7 @@ class Rmax_Agent:
                 self.max_visits[state][action]=self.m_uncertain_states
         if not self.correct_prior : self.wrong_prior()
     
-    def wrong_prior(self):#Below is the wrong prior version
+    def wrong_prior(self):
         for state in self.environment.states:
             for action in self.environment.actions:
                 self.max_visits[state][action]=np.random.randint(self.m,self.m_uncertain_states)
