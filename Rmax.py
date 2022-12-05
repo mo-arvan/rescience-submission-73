@@ -6,10 +6,11 @@ class Rmax_Agent:
 
     def __init__(self,environment, gamma=0.95, m=5,Rmax=200,m_uncertain_states=2,correct_prior=True):
         
-        self.Rmax=Rmax
         
         self.environment=environment
         self.gamma = gamma
+        
+        self.Rmax=Rmax
         self.m = m
         self.m_uncertain_states=m_uncertain_states
         

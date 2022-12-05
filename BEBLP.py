@@ -17,6 +17,7 @@ class BEBLP_Agent:
         
         self.environment=environment
         self.gamma = gamma
+        
         self.beta=beta
         
         self.Rsum=defaultdict(lambda: defaultdict(lambda: 0.0))
@@ -25,6 +26,8 @@ class BEBLP_Agent:
         
         self.nSA = defaultdict(lambda: defaultdict(lambda: 0)) #Compteur passage (état,action)
         self.nSAS = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0))) #Compteur (état_1,action,état_2)
+        
+        
         self.last_k=defaultdict(lambda: defaultdict(lambda: [(0,0)]*self.step_update))
         self.Q = defaultdict(lambda: defaultdict(lambda: 0.0)) #Q-valeur état-action
         self.bonus=defaultdict(lambda: defaultdict(lambda: 0.0))
@@ -33,7 +36,6 @@ class BEBLP_Agent:
         self.step_counter=0
         
         self.prior= defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
-        self.prior_0=defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
         
         self.tSAS_old=defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
         self.nSAS_old = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
@@ -43,7 +45,6 @@ class BEBLP_Agent:
         self.alpha=alpha
         
         self.coeff_prior=coeff_prior
-        self.known_state_action=[]
         self.ajout_states()
         
     def learn(self,old_state,reward,new_state,action):
@@ -51,10 +52,10 @@ class BEBLP_Agent:
         self.nSA[old_state][action] +=1
         self.nSAS[old_state][action][new_state] += 1
         self.Rsum[old_state][action]+=reward
-        self.R[old_state][action]=self.Rsum[old_state][action]/self.nSA[old_state][action]
-        self.prior[old_state][action][new_state]+=1  
         
-        #Modifier les probabilités de transition selon le prior avec distribution de dirichlet
+        self.R[old_state][action]=self.Rsum[old_state][action]/self.nSA[old_state][action]
+        
+        self.prior[old_state][action][new_state]+=1  
         self.tSAS[old_state][action]=count_to_dirichlet(self.prior[old_state][action])
         self.last_k[old_state][action][self.nSA[old_state][action]%self.step_update]=new_state
 
@@ -71,11 +72,6 @@ class BEBLP_Agent:
             old_CV,old_variance=self.cross_validation(new_dict_nSAS,new_dict_prior)
             self.LP[old_state][action]=max(old_CV-new_CV+self.alpha*np.sqrt(new_variance),0.001)
             self.bonus[old_state][action]=self.beta/(1+1/np.sqrt(self.LP[old_state][action]))
-            """if old_state==(0,0) and action==1:
-                print(old_CV,new_CV,new_variance)
-                print(self.LP[old_state][action],self.bonus[old_state][action])
-                print("")
-            """
         
             delta=1
             while delta > 1e-2 :
@@ -86,10 +82,9 @@ class BEBLP_Agent:
                         self.Q[visited_state][taken_action]=self.R[visited_state][taken_action]+self.bonus[visited_state][taken_action]+self.gamma*np.sum([max(self.Q[next_state].values())*self.tSAS[visited_state][taken_action][next_state] for next_state in self.tSAS[visited_state][taken_action]])
                         delta=max(delta,np.abs(value_action-self.Q[visited_state][taken_action]))     
 
-    def choose_action(self): #argmax pour choisir l'action
+    def choose_action(self): 
         self.step_counter+=1
         state=self.environment.current_location
-        
         q_values = self.Q[state]
         maxValue = max(q_values.values())
         action = np.random.choice([k for k, v in q_values.items() if v == maxValue])
