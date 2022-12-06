@@ -13,13 +13,17 @@ def count_to_dirichlet(dictionnaire):
 
 class BEBLP_Agent:
 
-    def __init__(self,environment, gamma=0.95, beta=1,step_update=10,alpha=0.5,coeff_prior=0.5):
+    def __init__(self,environment, gamma=0.95, beta=1,step_update=10,alpha=0.5,prior_LP=0.5):
         
         self.environment=environment
         self.gamma = gamma
         
         self.beta=beta
+        self.step_update=step_update
+        self.alpha=alpha
+        self.coeff_prior=prior_LP
         
+
         self.Rsum=defaultdict(lambda: defaultdict(lambda: 0.0))
         self.R = defaultdict(lambda: defaultdict(lambda: 0.0)) #Récompenses
         self.tSAS = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0))) #Transitions
@@ -28,23 +32,17 @@ class BEBLP_Agent:
         self.nSAS = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0))) #Compteur (état_1,action,état_2)
         
         
-        self.last_k=defaultdict(lambda: defaultdict(lambda: [(0,0)]*self.step_update))
         self.Q = defaultdict(lambda: defaultdict(lambda: 0.0)) #Q-valeur état-action
-        self.bonus=defaultdict(lambda: defaultdict(lambda: 0.0))
         
-        self.counter=self.nSA #Compteur (état,action)
+
+        self.bonus=defaultdict(lambda: defaultdict(lambda: 0.0))
+        self.prior= defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))        
+        
+        self.last_k=defaultdict(lambda: defaultdict(lambda: [(0,0)]*self.step_update))
+        self.LP=defaultdict(lambda: defaultdict(lambda: 0.0))
+
         self.step_counter=0
         
-        self.prior= defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
-        
-        self.tSAS_old=defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
-        self.nSAS_old = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
-        
-        self.LP=defaultdict(lambda: defaultdict(lambda: 0.0))
-        self.step_update=step_update
-        self.alpha=alpha
-        
-        self.coeff_prior=coeff_prior
         self.ajout_states()
         
     def learn(self,old_state,reward,new_state,action):
@@ -58,7 +56,6 @@ class BEBLP_Agent:
         self.prior[old_state][action][new_state]+=1  
         self.tSAS[old_state][action]=count_to_dirichlet(self.prior[old_state][action])
         self.last_k[old_state][action][self.nSA[old_state][action]%self.step_update]=new_state
-
         
         
         if self.nSA[old_state][action]>self.step_update:
@@ -73,15 +70,15 @@ class BEBLP_Agent:
             self.LP[old_state][action]=max(old_CV-new_CV+self.alpha*np.sqrt(new_variance),0.001)
             self.bonus[old_state][action]=self.beta/(1+1/np.sqrt(self.LP[old_state][action]))
         
-            delta=1
-            while delta > 1e-2 :
-                delta=0
-                for visited_state in self.nSA:
-                    for taken_action in self.nSA[visited_state]:
-                        value_action=self.Q[visited_state][taken_action]
-                        self.Q[visited_state][taken_action]=self.R[visited_state][taken_action]+self.bonus[visited_state][taken_action]+self.gamma*np.sum([max(self.Q[next_state].values())*self.tSAS[visited_state][taken_action][next_state] for next_state in self.tSAS[visited_state][taken_action]])
-                        delta=max(delta,np.abs(value_action-self.Q[visited_state][taken_action]))     
-
+        delta=1
+        while delta > 1e-2 :
+            delta=0
+            for visited_state in self.nSA:
+                for taken_action in self.nSA[visited_state]:
+                    value_action=self.Q[visited_state][taken_action]
+                    self.Q[visited_state][taken_action]=self.R[visited_state][taken_action]+self.bonus[visited_state][taken_action]+self.bonus[visited_state][taken_action]+self.gamma*np.sum([max(self.Q[next_state].values())*self.tSAS[visited_state][taken_action][next_state] for next_state in self.tSAS[visited_state][taken_action]])
+                    delta=max(delta,np.abs(value_action-self.Q[visited_state][taken_action]))    
+                
     def choose_action(self): 
         self.step_counter+=1
         state=self.environment.current_location

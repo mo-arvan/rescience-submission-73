@@ -4,7 +4,7 @@ from collections import defaultdict
 
 class RmaxLP_Agent:
 
-    def __init__(self,environment, gamma=0.95,Rmax=200,step_update=10,alpha=0.1,m=1):
+    def __init__(self,environment, gamma=0.95,Rmax=200,step_update=10,alpha=0.1,m=1,prior_LP=0.001):
         
         self.Rmax=Rmax
         
@@ -30,9 +30,9 @@ class RmaxLP_Agent:
         self.step_update=step_update
         self.alpha=alpha
         self.m=m
-        #self.known_state_action=[]
+        self.prior_LP=prior_LP
         self.ajout_states()
-        self.last_model_update=0
+
         
     def learn(self,old_state,reward,new_state,action):
                     
@@ -43,7 +43,6 @@ class RmaxLP_Agent:
                     
                     self.last_k[old_state][action][self.nSA[old_state][action]%self.step_update]=new_state
                     self.tSAS[old_state][action]=defaultdict(lambda:.0) 
-                     
                     for next_state in self.nSAS[old_state][action].keys():
                         self.tSAS[old_state][action][next_state] = self.nSAS[old_state][action][next_state]/self.nSA[old_state][action]
                     
@@ -96,7 +95,7 @@ class RmaxLP_Agent:
     
     def cross_validation(self,nSAS_SA):
         cv,v=0,[]
-        prior=0.04
+        prior=self.prior_LP
         sum_count=sum(nSAS_SA.values())
         sum_prior=sum_count + len(self.environment.states)*prior
         """if sum_count==1:

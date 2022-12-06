@@ -148,12 +148,7 @@ def fit_parameters_agent(environments,agent,agent_name,nb_iters,first_hp,second_
 
 
 
-from Rmax import Rmax_Agent
-from BEB import BEB_Agent
-from greedyMB import Epsilon_MB_Agent
-from BEBLP import BEBLP_Agent
-from RmaxLP import RmaxLP_Agent
-
+from agents import Rmax_Agent, BEB_Agent, Epsilon_MB_Agent, BEBLP_Agent, RmaxLP_Agent
 
 # Parameter fitting for each agent #
 

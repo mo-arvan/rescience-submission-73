@@ -153,7 +153,13 @@ def save_and_plot(pol,CI_pol,reward,CI_reward,agents_tested,names_environments,p
     plt.savefig('Results/Rewards'+time_end+names_environments[0]+'.png')
     plt.show()
 
-
+def evaluate_agents(environments,agents,nb_iters,play_params,agent_parameters,starting_seed):
+    
+    every_simulation=getting_simulations_to_do(environments,agents,nb_iters)
+    all_seeds=[starting_seed+i for i in range(len(every_simulation))]
+    pol_errors,rewards=main_function(all_seeds,every_simulation,play_params,agent_parameters)
+    pol,CI_pol, reward, CI_reward=extracting_results(rewards,pol_errors,environments,agents,nb_iters)
+    save_and_plot(pol,CI_pol,reward,CI_reward,agents,environments,play_params,environments,agent_parameters)
 
 ### PICTURES ###
 
