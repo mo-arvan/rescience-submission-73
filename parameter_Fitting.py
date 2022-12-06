@@ -79,7 +79,7 @@ def extracting_results(rewards,pol_error,names_environments,agents_tested,number
 
 
 def get_best_performance(pol_error_parameter):
-    return {(name_agent,hp_1,hp_2):np.average(pol_error_value[-20:]) for (name_agent,hp_1,hp_2),pol_error_value in pol_error_parameter.items()}
+    return {(name_agent,hp_1,hp_2):np.average(pol_error_value[-10:]) for (name_agent,hp_1,hp_2),pol_error_value in pol_error_parameter.items()}
 
 def plot_parameter_fitting(pol,CI_pol,reward,CI_reward,name_agent,first_hyperparameters,second_hyperparameters,play_parameters,name_environments):
     time_end=str(round(time.time()%1e7))
@@ -102,7 +102,7 @@ def plot_parameter_fitting(pol,CI_pol,reward,CI_reward,name_agent,first_hyperpar
     plt.ylabel(first_hyperparameters[0])
     plt.xticks([i+0.5 for i in range(len(second_hyperparameters[1:]))],second_hyperparameters[1:])
     plt.yticks([i+0.5 for i in range(len(first_hyperparameters[1:]))],first_hyperparameters[1:])
-    plt.title('Mean policy value error on the last 1000 steps')
+    plt.title('Mean policy value error on the last 500 steps')
     plt.savefig('Parameter fitting/heatmap'+name_agent+name_environments[0]+time_end+'.png')
     plt.close()
     
@@ -159,7 +159,7 @@ nb_iters=20
 
 
 #Reproduction of Lopes et al. (2012)
-"""
+
 #R-max
 agent_RA={'RA':Rmax_Agent}
 RA_basic_parameters={Rmax_Agent:{'gamma':0.95,'Rmax':1,'m':8,'m_uncertain_states':15,'correct_prior':True}}
@@ -167,8 +167,8 @@ RA_basic_parameters={Rmax_Agent:{'gamma':0.95,'Rmax':1,'m':8,'m_uncertain_states
 #agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
 
 
-first_hp_RA= ['m']+[i for i in range(1,21,2)]
-second_hp_RA=['m_uncertain_states']+[i for i in range(1,21,2)]
+first_hp_RA= ['m']+[i for i in range(3,11,1)]
+second_hp_RA=['m_uncertain_states']+[i for i in range(5,17,1)]
 starting_seed=10000
 fit_parameters_agent(environments,agent_RA,'RA',nb_iters,first_hp_RA,second_hp_RA,RA_basic_parameters,starting_seed,play_params)
 
@@ -176,8 +176,8 @@ fit_parameters_agent(environments,agent_RA,'RA',nb_iters,first_hp_RA,second_hp_R
 
 agent_RALP={'RALP':RmaxLP_Agent}
 RALP_basic_parameters={RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'m':2,'alpha':0.3,'prior_LP':0.001}}
-first_hp_RALP= ['m']+[round(i*0.1,1) for i in range(5,41,4)]
-second_hp_RALP=['alpha']+[round(i*0.1,1) for i in range(1,31,3)]
+first_hp_RALP= ['m']+[round(i*0.1,1) for i in range(1,31,3)]
+second_hp_RALP=['alpha']+[round(i*0.1,1) for i in range(1,21,2)]
 starting_seed=20000
 
 fit_parameters_agent(environments,agent_RALP,'RALP',nb_iters,first_hp_RALP,second_hp_RALP,RALP_basic_parameters,starting_seed,play_params)
@@ -187,20 +187,20 @@ fit_parameters_agent(environments,agent_RALP,'RALP',nb_iters,first_hp_RALP,secon
 agent_BEB={'BEB':BEB_Agent}
 BEB_basic_parameters={BEB_Agent:{'gamma':0.95,'beta':3,'coeff_prior':0.001,'correct_prior':True,'informative':True}}
 
-first_hp_BEB= ['beta']+[round(i*0.1,1) for i in range(1,61,6)]
-second_hp_BEB=['coeff_prior']+[round(i*0.1,1) for i in range(1,61,6)]
+first_hp_BEB= ['beta']+[round(i*0.1,1) for i in range(25,76,5)]
+second_hp_BEB=['coeff_prior']+[round(i*0.1,1) for i in range(1,31,5)]
 starting_seed=30000
 
 fit_parameters_agent(environments,agent_BEB,'BEB',nb_iters,first_hp_BEB,second_hp_BEB,BEB_basic_parameters,starting_seed,play_params)
 
 #BEBLP
-"""
+
 agent_BEBLP={'BEBLP':BEBLP_Agent}
 BEBLP_basic_parameters={BEBLP_Agent:{'gamma':0.95,'beta':2.4,'step_update':10,'prior_LP':0.001,'alpha':0.4}}
 
 
-first_hp_BEBLP= ['beta']+[round(i*0.1,1) for i in range(1,61,6)]
-second_hp_BEBLP=['alpha']+[round(i*0.1,1) for i in range(1,31,3)]
+first_hp_BEBLP= ['beta']+[round(i*0.1,1) for i in range(15,71,5)]
+second_hp_BEBLP=['alpha']+[round(i*0.1,1) for i in range(1,14,2)]
 starting_seed=40000
 
 fit_parameters_agent(environments,agent_BEBLP,'BEBLP',nb_iters,first_hp_BEBLP,second_hp_BEBLP,BEBLP_basic_parameters,starting_seed,play_params)
