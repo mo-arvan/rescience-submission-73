@@ -93,7 +93,7 @@ def plot_parameter_fitting(pol,CI_pol,reward,CI_reward,name_agent,first_hyperpar
         for index_hp_2,hp_2 in enumerate(second_hyperparameters[1:]) :
             array_result[(index_hp_1,index_hp_2)]=avg_pol_last_1000_steps[name_agent,hp_1,hp_2]
     
-    array_result[array_result < np.median(array_result)] = np.median(array_result)
+    array_result[array_result < np.median(array_result)] = max(np.median(array_result),-1)
     
     fig=plt.figure(dpi=300)
     fig.add_subplot(1, 1, 1)
@@ -155,7 +155,7 @@ from agents import Rmax_Agent, BEB_Agent, Epsilon_MB_Agent, BEBLP_Agent, RmaxLP_
 environments_parameters=loading_environments()
 play_params={'trials':100, 'max_step':30, 'screen':False,'photos':[10,20,50,80,99],'accuracy_VI':0.01,'step_between_VI':50}
 environments=["Lopes"]
-nb_iters=10
+nb_iters=20
 
 
 #Reproduction of Lopes et al. (2012)
@@ -175,9 +175,9 @@ fit_parameters_agent(environments,agent_RA,'RA',nb_iters,first_hp_RA,second_hp_R
 #RALP
 
 agent_RALP={'RALP':RmaxLP_Agent}
-RALP_basic_parameters={RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'m':2,'alpha':0.3}}
-first_hp_RALP= ['m']+[round(i*0.1,1) for i in range(1,41,4)]
-second_hp_RALP=['alpha']+[round(i*0.1,1) for i in range(1,41,4)]
+RALP_basic_parameters={RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'m':2,'alpha':0.3,'prior_LP':0.001}}
+first_hp_RALP= ['m']+[round(i*0.1,1) for i in range(5,41,4)]
+second_hp_RALP=['alpha']+[round(i*0.1,1) for i in range(1,31,3)]
 starting_seed=20000
 
 fit_parameters_agent(environments,agent_RALP,'RALP',nb_iters,first_hp_RALP,second_hp_RALP,RALP_basic_parameters,starting_seed,play_params)
@@ -196,14 +196,13 @@ fit_parameters_agent(environments,agent_BEB,'BEB',nb_iters,first_hp_BEB,second_h
 #BEBLP
 
 agent_BEBLP={'BEBLP':BEBLP_Agent}
-BEBLP_basic_parameters={BEBLP_Agent:{'gamma':0.95,'beta':2.4,'step_update':10,'coeff_prior':0.001,'alpha':0.4}}
+BEBLP_basic_parameters={BEBLP_Agent:{'gamma':0.95,'beta':2.4,'step_update':10,'prior_LP':0.001,'alpha':0.4}}
 
 
 first_hp_BEBLP= ['beta']+[round(i*0.1,1) for i in range(1,61,6)]
-second_hp_BEBLP=['alpha']+[round(i*0.1,1) for i in range(1,41,4)]
+second_hp_BEBLP=['alpha']+[round(i*0.1,1) for i in range(1,31,3)]
 starting_seed=40000
 
 fit_parameters_agent(environments,agent_BEBLP,'BEBLP',nb_iters,first_hp_BEBLP,second_hp_BEBLP,BEBLP_basic_parameters,starting_seed,play_params)
-
 
 
