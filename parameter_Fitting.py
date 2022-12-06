@@ -93,7 +93,7 @@ def plot_parameter_fitting(pol,CI_pol,reward,CI_reward,name_agent,first_hyperpar
         for index_hp_2,hp_2 in enumerate(second_hyperparameters[1:]) :
             array_result[(index_hp_1,index_hp_2)]=avg_pol_last_1000_steps[name_agent,hp_1,hp_2]
     
-    array_result[array_result < np.median(array_result)] = max(np.median(array_result),-1)
+    array_result[array_result < max(np.median(array_result),-1)] = max(np.median(array_result),-1)
     
     fig=plt.figure(dpi=300)
     fig.add_subplot(1, 1, 1)
@@ -159,7 +159,7 @@ nb_iters=20
 
 
 #Reproduction of Lopes et al. (2012)
-
+"""
 #R-max
 agent_RA={'RA':Rmax_Agent}
 RA_basic_parameters={Rmax_Agent:{'gamma':0.95,'Rmax':1,'m':8,'m_uncertain_states':15,'correct_prior':True}}
@@ -194,7 +194,7 @@ starting_seed=30000
 fit_parameters_agent(environments,agent_BEB,'BEB',nb_iters,first_hp_BEB,second_hp_BEB,BEB_basic_parameters,starting_seed,play_params)
 
 #BEBLP
-
+"""
 agent_BEBLP={'BEBLP':BEBLP_Agent}
 BEBLP_basic_parameters={BEBLP_Agent:{'gamma':0.95,'beta':2.4,'step_update':10,'prior_LP':0.001,'alpha':0.4}}
 
