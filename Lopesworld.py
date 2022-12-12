@@ -11,6 +11,7 @@ def choice_dictionary(dictionary):
     return keys[chosen_index]
 
 class Lopes_State():
+    
     def __init__(self,transitions,rewards,transitions_after_change=[]):
         self.height = 5
         self.width = 5

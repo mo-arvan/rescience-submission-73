@@ -1,6 +1,6 @@
 import numpy as np
 import time
-from Useful_functions import play,loading_environments
+from main_Functions import play,loading_environments
 from Lopesworld import Lopes_State
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -84,7 +84,7 @@ def get_best_performance(pol_error_parameter):
 def plot_parameter_fitting(pol,CI_pol,reward,CI_reward,name_agent,first_hyperparameters,second_hyperparameters,play_parameters,name_environments):
     time_end=str(round(time.time()%1e7))
     np.save('Parameter fitting/'+time_end+'_'+name_environments[0]+'_'+name_agent+'_polerror.npy',pol)
-    rename={'RA':'R-max','BEB':'BEB','BEBLP':'ζ-EB','RALP':'ζ-R-max','Epsilon_MB':'Ɛ-greedy'}
+    rename={'RA':'R-max','BEB':'BEB','EBLP':'ζ-EB','RALP':'ζ-R-max','Epsilon_MB':'Ɛ-greedy'}
     
     
     avg_pol_last_1000_steps=get_best_performance(pol)
@@ -93,7 +93,7 @@ def plot_parameter_fitting(pol,CI_pol,reward,CI_reward,name_agent,first_hyperpar
         for index_hp_2,hp_2 in enumerate(second_hyperparameters[1:]) :
             array_result[(index_hp_1,index_hp_2)]=avg_pol_last_1000_steps[name_agent,hp_1,hp_2]
     
-    array_result[array_result < max(np.median(array_result),-1)] = max(np.median(array_result),-1)
+    #array_result[array_result < max(np.median(array_result),-1)] = max(np.median(array_result),-1)
     
     fig=plt.figure(dpi=300)
     fig.add_subplot(1, 1, 1)
@@ -102,7 +102,7 @@ def plot_parameter_fitting(pol,CI_pol,reward,CI_reward,name_agent,first_hyperpar
     plt.ylabel(first_hyperparameters[0])
     plt.xticks([i+0.5 for i in range(len(second_hyperparameters[1:]))],second_hyperparameters[1:])
     plt.yticks([i+0.5 for i in range(len(first_hyperparameters[1:]))],first_hyperparameters[1:])
-    plt.title('Mean policy value error on the last 500 steps')
+    plt.title('Mean policy value error of '+rename[name_agent]+' on the last 500 steps')
     plt.savefig('Parameter fitting/heatmap'+name_agent+name_environments[0]+time_end+'.png')
     plt.close()
     
@@ -148,7 +148,7 @@ def fit_parameters_agent(environments,agent,agent_name,nb_iters,first_hp,second_
 
 
 
-from agents import Rmax_Agent, BEB_Agent, Epsilon_MB_Agent, BEBLP_Agent, RmaxLP_Agent
+from agents import Rmax_Agent, BEB_Agent, Epsilon_MB_Agent, EBLP_Agent, RmaxLP_Agent
 
 # Parameter fitting for each agent #
 
@@ -164,7 +164,7 @@ nb_iters=20
 agent_RA={'RA':Rmax_Agent}
 RA_basic_parameters={Rmax_Agent:{'gamma':0.95,'Rmax':1,'m':8,'m_uncertain_states':15,'correct_prior':True}}
 
-#agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'BEBLP':BEBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
+#agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'EBLP':EBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
 
 
 first_hp_RA= ['m']+[i for i in range(3,11,1)]
@@ -188,21 +188,47 @@ agent_BEB={'BEB':BEB_Agent}
 BEB_basic_parameters={BEB_Agent:{'gamma':0.95,'beta':3,'coeff_prior':0.001,'correct_prior':True,'informative':True}}
 
 first_hp_BEB= ['beta']+[round(i*0.1,1) for i in range(25,76,5)]
-second_hp_BEB=['coeff_prior']+[round(i*0.1,1) for i in range(1,31,5)]
+second_hp_BEB=['coeff_prior']+[2]
 starting_seed=30000
 
 fit_parameters_agent(environments,agent_BEB,'BEB',nb_iters,first_hp_BEB,second_hp_BEB,BEB_basic_parameters,starting_seed,play_params)
 
-#BEBLP
+#EBLP
 
-agent_BEBLP={'BEBLP':BEBLP_Agent}
-BEBLP_basic_parameters={BEBLP_Agent:{'gamma':0.95,'beta':2.4,'step_update':10,'prior_LP':0.001,'alpha':0.4}}
+agent_EBLP={'EBLP':EBLP_Agent}
+EBLP_basic_parameters={EBLP_Agent:{'gamma':0.95,'beta':2.4,'step_update':10,'prior_LP':0.001,'alpha':0.4}}
 
 
-first_hp_BEBLP= ['beta']+[round(i*0.1,1) for i in range(15,71,5)]
-second_hp_BEBLP=['alpha']+[round(i*0.1,1) for i in range(1,14,2)]
+first_hp_EBLP= ['beta']+[round(i*0.1,1) for i in range(15,71,5)]
+second_hp_EBLP=['alpha']+[round(i*0.1,1) for i in range(1,14,2)]
 starting_seed=40000
 
-fit_parameters_agent(environments,agent_BEBLP,'BEBLP',nb_iters,first_hp_BEBLP,second_hp_BEBLP,BEBLP_basic_parameters,starting_seed,play_params)
+fit_parameters_agent(environments,agent_EBLP,'EBLP',nb_iters,first_hp_EBLP,second_hp_EBLP,EBLP_basic_parameters,starting_seed,play_params)
 
+# Epsilon_MB
 
+agent_Epsilon_MB={'Epsilon_MB':Epsilon_MB_Agent}
+Epsilon_MB_basic_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.2}}
+
+first_hp_Epsilon_MB= ['gamma']+[0.95]
+second_hp_Epsilon_MB=['epsilon']+[round(i*0.05,2) for i in range(1,8,1)]
+starting_seed=50000
+
+fit_parameters_agent(environments,agent_Epsilon_MB,'Epsilon_MB',nb_iters,first_hp_Epsilon_MB,second_hp_Epsilon_MB,Epsilon_MB_basic_parameters,starting_seed,play_params)
+
+#Impact of the prior factor for BEB
+
+agent_BEB={'BEB':BEB_Agent}
+BEB_basic_parameters={BEB_Agent:{'gamma':0.95,'beta':3,'coeff_prior':0.001,'correct_prior':True,'informative':True}}
+
+first_hp_BEB= ['beta']+[round(i*0.1,1) for i in range(25,76,5)]
+second_hp_BEB=['coeff_prior']+[2]
+starting_seed=60000
+
+fit_parameters_agent(environments,agent_BEB,'BEB',nb_iters,first_hp_BEB,second_hp_BEB,BEB_basic_parameters,starting_seed,play_params)
+
+#Parameter fitting without informative prior BEB
+starting_seed=70000
+
+#Parameter fitting without informative prior Rmax
+starting_seed=80000

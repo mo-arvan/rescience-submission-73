@@ -80,7 +80,7 @@ def reward_Lopes(bonus=1,malus=-0.1):
 
 def save_rewards(bonus=1,malus=-0.1):
     array_rewards=reward_Lopes(bonus,malus)
-    np.save('Mondes/Rewards_Lopes_'+str(bonus)+'_'+str(malus)+'.npy',array_rewards)
+    np.save('Environments/Rewards_Lopes_'+str(bonus)+'_'+str(malus)+'.npy',array_rewards)
         
 #Validity of the worlds generated     
 
@@ -99,14 +99,13 @@ def valid_Lopes(alphas=[1,0.1],malus=-0.1,bonus=1):
         return valid_policy(policy),transitions
 
 #Statistics about the proportion of valid worlds           
-def proportion_valid_Lopes(iterations=1000,alphas=[1,0.1],malus=-0.1,bonus=1):
+def proportion_of_valid_worlds(iterations=1000,alphas=[1,0.1],malus=-0.1,bonus=1):
     valid_count=0
     for i in range(iterations):
-        if i%100==0: print('Loading '+str(int(100*i/iterations))+'%')
         validity,_=valid_Lopes(alphas,malus,bonus)
         valid_count+=validity
     print('')    
-    print('Percentage of valid worlds out of '+str(iterations)+' sampled worlds: ' +str(round(100*valid_count/iterations,1))+'%')
+    print('Percentage of valid worlds out of '+str(iterations)+' sampled worlds, with a malus of'+str(malus)+': '+str(round(100*valid_count/iterations,1))+'%')
 
 #Functions to generate each world
 def generate_valid_stationary_environments(number_of_worlds=1,alphas=[1,0.1],malus=-0.1,bonus=1): 
@@ -116,22 +115,22 @@ def generate_valid_stationary_environments(number_of_worlds=1,alphas=[1,0.1],mal
             validity,transitions=valid_Lopes(alphas,malus,bonus)
             counter+=1
         if counter ==1000 : raise RuntimeError('A world does not have the optimal policy')
-        np.save('Mondes/Transitions_Lopes_'+str(malus)+'_'+str(index_world)+'.npy',transitions)
+        np.save('Environments/Transitions_Lopes_'+str(malus)+'_'+str(index_world)+'.npy',transitions)
 
 
 def generate_non_stationarity_article(world_number=1,number_of_worlds=1,malus=-0.1):
     for index_world in range(1,world_number+1):
-        transitions=np.load('Mondes/Transitions_Lopes_'+str(malus)+'_'+str(index_world)+'.npy',allow_pickle=True)
+        transitions=np.load('Environments/Transitions_Lopes_'+str(malus)+'_'+str(index_world)+'.npy',allow_pickle=True)
         for non_stat_number in range(1,number_of_worlds+1):
             transitions_non_stationary_article=non_stat_Lopes_article(transitions,np.random.randint(len(states_optimal_path)))
-            np.save('Mondes/Transitions_non_stat_article'+str(malus)+'_'+str(index_world)+'_'+str(non_stat_number)+'.npy',transitions_non_stationary_article)
+            np.save('Environments/Transitions_non_stat_article'+str(malus)+'_'+str(index_world)+'_'+str(non_stat_number)+'.npy',transitions_non_stationary_article)
         
 def generate_strong_non_stationarity_(world_number=1,number_of_worlds=1,malus=-0.1):
     for index_world in range(1,world_number+1):
-        transitions=np.load('Mondes/Transitions_Lopes_'+str(malus)+'_'+str(index_world)+'.npy',allow_pickle=True)
+        transitions=np.load('Environments/Transitions_Lopes_'+str(malus)+'_'+str(index_world)+'.npy',allow_pickle=True)
         for non_stat_number in range(1,number_of_worlds+1):
             transitions_strong_non_stationarity=non_stat_Lopes_all_states(transitions)
-            np.save('Mondes/Transitions_strong_non_stat_'+str(malus)+'_'+str(index_world)+'_'+str(non_stat_number)+'.npy',transitions_strong_non_stationarity)
+            np.save('Environments/Transitions_strong_non_stat_'+str(malus)+'_'+str(index_world)+'_'+str(non_stat_number)+'.npy',transitions_strong_non_stationarity)
 
 
 
@@ -163,3 +162,7 @@ generate_non_stationarity_article(world_number=10,number_of_worlds=10,malus=-1)
 np.random.seed(6)
 generate_strong_non_stationarity_(world_number=10,number_of_worlds=10,malus=-1)
 
+#Checking how many worlds are valid out of 1000 for each condition
+np.random.seed(7)
+proportion_of_valid_worlds(iterations=1000,alphas=[1,0.1],malus=-0.1,bonus=1)
+proportion_of_valid_worlds(iterations=1000,alphas=[1,0.1],malus=-1,bonus=1)

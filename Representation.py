@@ -1,22 +1,17 @@
 import pygame
 import math
-import numpy as np
-from policy_Functions import value_iteration  
+import numpy as np 
 
 UP,DOWN,LEFT,RIGHT,STAY=0,1,2,3,4
 
-class Graphique():
+class World_Representation:
 
     def __init__(self, environment, table=np.zeros((0,0)),actions={},title='Best policy'):
         
         
         self.BLACK = (0, 0, 0)
         self.WHITE = (255, 255, 255)
-        self.GREEN = (0, 255, 0)
         self.RED = (255, 0, 0)
-        self.BLUE = (0, 0, 255)
-        self.YELLOW = (255, 255, 0)
-        self.PURPLE=(108,2,119)
         self.WIDTH = 45
         self.HEIGHT = 45
         self.MARGIN = 5
@@ -27,10 +22,9 @@ class Graphique():
         self.size = (environment.height*50, environment.width*50)
         self.screen = pygame.Surface(self.size)
         
-        self.font = pygame.font.SysFont('arial', 16)
+        self.font = pygame.font.SysFont('arial', 18)
 
         pygame.display.set_caption(title)    
-        self.clock = pygame.time.Clock()
 
         self.grid = environment.grid
         self.init=(environment.first_location[0],environment.first_location[1])
@@ -57,8 +51,7 @@ class Graphique():
                         pygame.draw.rect(self.screen,
 					                 self.color,[(self.MARGIN + self.WIDTH)*col+self.MARGIN,
 					                 (self.MARGIN + self.HEIGHT)*row+self.MARGIN,self.WIDTH,self.HEIGHT])
-                 
-        
+                         
         if actions!={}:
             for (row,col),value in actions.items():
                     if self.grid[row][col]!=-1:
@@ -72,9 +65,12 @@ class Graphique():
                             x+=correction[best_action][0]
                             y+=correction[best_action][1]
                             self.DrawArrow(x, y,self.BLACK,angles[best_action])
-                            
-    def show(self):
-        pygame.display.flip()
+       
+        starting_state=self.font.render("S",1,self.BLACK)
+        self.screen.blit(starting_state,(35,30))
+        goal_state=self.font.render("G",1,self.BLACK)
+        self.screen.blit(goal_state,(35+4*50,30+2*50))
+                    
 
     def DrawArrow(self,x,y,color,angle=0):
         def rotate(pos, angle):	
@@ -89,6 +85,10 @@ class Graphique():
         p1 = rotate((0+x,8+y), angle+90)
         p2 = rotate((16+x,0+y), angle+90)
         pygame.draw.polygon(self.screen, color, [p0,p1,p2])
+
+
+
+#Enables to see the transitions of a given world
 
 class Transition():
 
@@ -157,19 +157,18 @@ class Transition():
 
 
 
-
-def montrer_transition(world_number,action,row,col):
-    world=np.load('Mondes/World_' + str(world_number) +'.npy')
-    all_transitions=np.load('Mondes/Transitions_'+str(world_number)+'.npy',allow_pickle=True)
+def show_transition(world_number,action,row,col):
+    world=np.load('Environments/Transitions_' + str(world_number) +'.npy')
+    all_transitions=np.load('Environments/Transitions_'+str(world_number)+'.npy',allow_pickle=True)
     transition=all_transitions[action][row][col]
     walls={(row-1,col-1):0,(row-1,col):0,(row-1,col+1):0,(row,col-1):0,(row,col):0,(row,col+1):0,(row+1,col-1):0,(row+1,col):0,(row+1,col+1):0}
     for case in walls.keys() : 
         if case[0]<0 or case[1]<0 or case[0]>=len(world) or case[1]>=len(world) or world[case[0],case[1]]==-1:
             walls[case]=1
-    actions=['UP','DOWN','LEFT','RIGHT']
+    actions=['UP','DOWN','LEFT','RIGHT','STAY']
     titre ="Action " +actions[action]+ ", case ("+str(row)+","+str(col)+")"+" dans le monde "+str(world_number)
     transi=Transition((row,col),titre,transition,walls,action)
     pygame.display.flip()
-    pygame.image.save(transi.screen,"Mondes/"+str(titre)+'.png')
+    pygame.image.save(transi.screen,"Environments/"+str(titre)+'.png')
     pygame.time.delay(5000)
     pygame.quit()

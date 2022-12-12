@@ -9,19 +9,6 @@ def count_to_dirichlet(dictionnaire):
     results=np.random.dirichlet(values)
     return {keys[i]:results[i] for i in range(len(dictionnaire))}
 
-def cross_validation(nSAS_SA,prior_SA): 
-        cv,v=0,[]
-        sum_prior=sum(prior_SA.values())
-        for next_state,next_state_count in nSAS_SA.items():            
-            value=(prior_SA[next_state]-1)/(sum_prior-1)
-            cv-=np.log(value)*next_state_count
-            v+=[-np.log(value)]*int(next_state_count)
-        v=np.array(v)
-        cardinal=sum(nSAS_SA.values())
-        cross_val =cv/cardinal
-        v=(v-cross_val)**2
-        variance_cv=np.sum(v)/cardinal
-        return cross_val,variance_cv
 
 class basic_Agent:
 
@@ -33,6 +20,7 @@ class basic_Agent:
         
         self.R = defaultdict(lambda: defaultdict(lambda: 0.0))
         self.Rsum=defaultdict(lambda: defaultdict(lambda: 0.0))
+        self.R_VI=defaultdict(lambda: defaultdict(lambda: 0.0))
         
         self.nSA = defaultdict(lambda: defaultdict(lambda: 0))
         self.nSAS = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0)))
@@ -43,15 +31,6 @@ class basic_Agent:
         self.step_counter=0
         self.initialize_states()
         
-    def value_iteration(self):
-        delta=1
-        while delta > 1e-2 :
-            delta=0
-            for visited_state in self.nSA:
-                for taken_action in self.nSA[visited_state]:
-                    value_action=self.Q[visited_state][taken_action]
-                    self.Q[visited_state][taken_action]=self.R[visited_state][taken_action]+self.gamma*np.sum([max(self.Q[next_state].values())*self.tSAS[visited_state][taken_action][next_state] for next_state in self.tSAS[visited_state][taken_action]])
-                    delta=max(delta,np.abs(value_action-self.Q[visited_state][taken_action]))
                     
     def choose_action(self):
         self.step_counter+=1
@@ -67,8 +46,9 @@ class basic_Agent:
                     self.nSA[old_state][action] +=1
                     self.nSAS[old_state][action][new_state] += 1
                     self.Rsum[old_state][action]+=reward
-
-                    self.compute_reward(old_state,reward,action)                
+                    self.R[old_state][action]=self.Rsum[old_state][action]/self.nSA[old_state][action]
+                    
+                    self.compute_reward_VI(old_state,reward,action)                
                     self.compute_transitions(old_state,new_state,action)
                     self.compute_learning_progress(old_state,new_state,action)
                     
@@ -81,8 +61,8 @@ class basic_Agent:
             self.tSAS[old_state][action][next_state] = self.nSAS[old_state][action][next_state]/self.nSA[old_state][action]
 
         
-    def compute_reward(self,old_state,reward,action):
-        self.R[old_state][action]=self.Rsum[old_state][action]/self.nSA[old_state][action]
+    def compute_reward_VI(self,old_state,reward,action):
+        self.R_VI[old_state][action]=self.R[old_state][action]
     
     def initialize_states(self):
         self.states=self.environment.states
@@ -92,6 +72,17 @@ class basic_Agent:
                 for state_2 in self.states:
                     self.tSAS[state_1][action][state_2]=1/number_states
                 self.Q[state_1][action]=1/(1-self.gamma)
+    
+    def value_iteration(self):
+        delta=1
+        while delta > 1e-2 :
+            delta=0
+            for visited_state in self.nSA:
+                for taken_action in self.nSA[visited_state]:
+                    value_action=self.Q[visited_state][taken_action]
+                    self.Q[visited_state][taken_action]=self.R_VI[visited_state][taken_action]+self.gamma*np.sum([max(self.Q[next_state].values())*self.tSAS[visited_state][taken_action][next_state] 
+                                                                                                                  for next_state in self.tSAS[visited_state][taken_action]])
+                    delta=max(delta,np.abs(value_action-self.Q[visited_state][taken_action]))
     
     def compute_learning_progress(self, old_state, new_state, action):
         pass
@@ -124,15 +115,15 @@ class Rmax_Agent(basic_Agent):
         self.max_visits=defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
         super().__init__(environment,gamma)
         
-    def compute_reward(self,old_state, reward, action):
-        if self.nSA[old_state][action]>=self.max_visits[old_state][action]: self.R[old_state][action]=self.Rsum[old_state][action]/self.nSA[old_state][action]
-        else : self.R[old_state][action]=self.Rmax
+    def compute_reward_VI(self,old_state, reward, action):
+        if self.nSA[old_state][action]>=self.max_visits[old_state][action]: self.R_VI[old_state][action]=self.R[old_state][action]
+        else : self.R_VI[old_state][action]=self.Rmax
     
     def initialize_states(self):
         self.states=self.environment.states
         for state_1 in self.states:
             for action in self.environment.actions:
-                self.R[state_1][action]=self.Rmax
+                self.R_VI[state_1][action]=self.Rmax
                 self.Q[state_1][action]=self.Rmax/(1-self.gamma)
                 self.max_visits[state_1][action]=self.m
                 for state_2 in self.states:
@@ -161,21 +152,16 @@ class BEB_Agent(basic_Agent):
         self.prior_0=defaultdict(lambda: defaultdict(lambda: defaultdict(lambda:0.0)))
         super().__init__(environment,gamma)
     
+    def compute_reward_VI(self,old_state, reward, action):
+        self.prior_0[old_state][action]+=1
+        self.bonus[old_state][action]=self.beta/(1+self.prior_0[old_state][action])
+        self.R_VI[old_state][action]=self.R[old_state][action]+self.bonus[old_state][action]
+
+    
     def compute_transitions(self, old_state, new_state, action):
         self.prior[old_state][action][new_state]+=1
-        self.prior_0[old_state][action]+=1
         self.tSAS[old_state][action]=count_to_dirichlet(self.prior[old_state][action])
-        self.bonus[old_state][action]=self.beta/(1+self.prior_0[old_state][action])
     
-    def value_iteration(self):
-        delta=1
-        while delta > 1e-2 :
-            delta=0
-            for visited_state in self.nSA:
-                for taken_action in self.nSA[visited_state]:
-                    value_action=self.Q[visited_state][taken_action]
-                    self.Q[visited_state][taken_action]=self.R[visited_state][taken_action]+self.bonus[visited_state][taken_action]+self.gamma*np.sum([max(self.Q[next_state].values())*self.tSAS[visited_state][taken_action][next_state] for next_state in self.tSAS[visited_state][taken_action]])
-                    delta=max(delta,np.abs(value_action-self.Q[visited_state][taken_action]))
     
     def initialize_states(self):
         self.states=self.environment.states
@@ -192,7 +178,7 @@ class BEB_Agent(basic_Agent):
                     for state_2 in self.states : 
                         self.prior[state_1][action][state_2]=self.coeff_prior
                         self.prior_0[state_1][action]=len(self.states)*self.coeff_prior
-                self.bonus[state_1][action]=self.beta
+                self.bonus[state_1][action]=self.beta/(1+self.prior_0[state_1][action])
                 self.Q[state_1][action]=(1+self.beta)/(1-self.gamma)
                 for state_2 in self.states:
                     self.tSAS[state_1][action][state_2]=1/len(self.states)
@@ -256,7 +242,7 @@ class Learning_Progress_Agent(basic_Agent):
         variance_cv=np.sum(var)/sum_count
         return cross_validation,variance_cv
 
-class BEBLP_Agent(Learning_Progress_Agent):
+class EBLP_Agent(Learning_Progress_Agent):
     
     def __init__(self,environment, gamma, beta,step_update,alpha,prior_LP):
         
@@ -264,11 +250,12 @@ class BEBLP_Agent(Learning_Progress_Agent):
         self.bonus=defaultdict(lambda: defaultdict(lambda: 0.0))
         super().__init__(environment,gamma,step_update,alpha,prior_LP)
     
-    
-    def compute_transitions(self, old_state, new_state, action):
-
-        self.tSAS[old_state][action]=count_to_dirichlet(self.nSAS[old_state][action])
+    def compute_reward_VI(self,old_state, reward, action):
         self.bonus[old_state][action]=self.beta/(1+1/np.sqrt(self.LP[old_state][action]))
+        self.R_VI[old_state][action]=self.R[old_state][action]+self.bonus[old_state][action]
+        
+    """def compute_transitions(self, old_state, new_state, action):
+        self.tSAS[old_state][action]=count_to_dirichlet(self.nSAS[old_state][action])"""
         
     def initialize_states(self):
         self.states=self.environment.states
@@ -280,18 +267,7 @@ class BEBLP_Agent(Learning_Progress_Agent):
                 self.Q[state_1][action]=(1+self.beta)/(1-self.gamma)
                 self.LP[state_1][action]=np.log(number_states)
                 self.bonus[state_1][action]=self.beta/(1+1/np.sqrt(self.LP[state_1][action]))
-     
-
-    def value_iteration(self):
-        delta=1
-        while delta > 1e-2 :
-            delta=0
-            for visited_state in self.nSA:
-                for taken_action in self.nSA[visited_state]:
-                    value_action=self.Q[visited_state][taken_action]
-                    self.Q[visited_state][taken_action]=self.R[visited_state][taken_action]+self.bonus[visited_state][taken_action]+self.bonus[visited_state][taken_action]+self.gamma*np.sum([max(self.Q[next_state].values())*self.tSAS[visited_state][taken_action][next_state] for next_state in self.tSAS[visited_state][taken_action]])
-                    delta=max(delta,np.abs(value_action-self.Q[visited_state][taken_action]))
-    
+      
             
 class RmaxLP_Agent(Learning_Progress_Agent):
 
@@ -301,9 +277,9 @@ class RmaxLP_Agent(Learning_Progress_Agent):
         self.m=m        
         super().__init__(environment,gamma,step_update,alpha,prior_LP)
         
-    def compute_reward(self, old_state, reward, action):
-        if self.LP[old_state][action] < self.m :self.R[old_state][action]=self.Rsum[old_state][action]/self.nSA[old_state][action]
-        else : self.R[old_state][action]=self.Rmax   
+    def compute_reward_VI(self,old_state, reward, action):
+        if self.LP[old_state][action] < self.m : self.R_VI[old_state][action]=self.R[old_state][action]
+        else : self.R_VI[old_state][action]=self.Rmax
             
     def initialize_states(self):
         self.states=self.environment.states
