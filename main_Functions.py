@@ -7,7 +7,7 @@ import time
 from multiprocessing import Pool
 
 
-from Lopesworld import Lopes_State
+from Lopesworld import Lopes_environment
 
 
 from Representation import World_Representation
@@ -74,7 +74,7 @@ environment_parameters=loading_environments()
 
 def play_with_params(name_environment,name_agent,agent,iteration,play_parameters,seed,agent_parameters):
     np.random.seed(seed)
-    environment=Lopes_State(**environment_parameters[name_environment])
+    environment=Lopes_environment(**environment_parameters[name_environment])
     globals()[name_agent]=agent(environment,**agent_parameters[agent])
     return (name_agent,name_environment,iteration),play(environment,globals()[name_agent],**play_parameters)
     
@@ -244,9 +244,9 @@ def compute_optimal_policies():
     for name_environment in environment_parameters.keys():
         if 'transitions_after_change' in environment_parameters[name_environment].keys():
             environment_parameters[name_environment]['transitions']=environment_parameters[name_environment]['transitions_after_change']
-        environment=Lopes_State(**environment_parameters[name_environment])
+        environment=Lopes_environment(**environment_parameters[name_environment])
         gridworld=plot_VI(environment,gamma=0.95,accuracy=0.001)
-        pygame.image.save(gridworld.screen,"Images/Optimal policy/VI_"+name_environment+".png")
+        pygame.image.save(gridworld.screen,"Images/Optimal policy in each environment/VI_"+name_environment+".png")
 
 
 ### SAVING PARAMETERS ####

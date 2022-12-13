@@ -10,7 +10,7 @@ def choice_dictionary(dictionary):
     chosen_index=np.random.choice(chosen_index,1, p=values)[0]
     return keys[chosen_index]
 
-class Lopes_State():
+class Lopes_environment():
     
     def __init__(self,transitions,rewards,transitions_after_change=[]):
         self.height = 5

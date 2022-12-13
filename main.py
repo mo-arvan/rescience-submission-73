@@ -22,7 +22,7 @@ agent_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.1},
             RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'alpha':0.3,'m':2,'prior_LP':0.04}}
 
 environments=["Lopes"]
-nb_iters=10
+nb_iters=1
 
 starting_seed=100
 evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,starting_seed)

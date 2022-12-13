@@ -85,7 +85,7 @@ def save_rewards(bonus=1,malus=-0.1):
 #Validity of the worlds generated     
 
 from policy_Functions import value_iteration
-from Lopesworld import Lopes_State
+from Lopesworld import Lopes_environment
 
 #Use only worlds in which the optimal path corresponds to the one in the article    
 def valid_policy(policy):
@@ -94,7 +94,7 @@ def valid_policy(policy):
 
 def valid_Lopes(alphas=[1,0.1],malus=-0.1,bonus=1):
         transitions,rewards=np.array(transition_Lopes(alphas)),reward_Lopes(malus=malus)
-        environment=Lopes_State(transitions,rewards)
+        environment=Lopes_environment(transitions,rewards)
         _,policy=value_iteration(environment,0.95,0.01)
         return valid_policy(policy),transitions
 
