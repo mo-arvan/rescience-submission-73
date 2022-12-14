@@ -198,8 +198,8 @@ RA_basic_parameters={Rmax_Agent:{'gamma':0.95,'Rmax':1,'m':8,'m_uncertain_states
 #agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'EBLP':EBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
 
 
-first_hp_RA= ['m']+[i for i in range(1,15,1)]
-second_hp_RA=['m_uncertain_states']+[i for i in range(3,18,1)]
+first_hp_RA= ['m']+[i for i in range(5,41,5)]
+second_hp_RA=['m_uncertain_states']+[i for i in range(5,41,5)]
 starting_seed=10000
 fit_parameters_agent(environments,agent_RA,'RA',nb_iters,first_hp_RA,second_hp_RA,RA_basic_parameters,starting_seed,play_params)
 
@@ -208,8 +208,8 @@ fit_parameters_agent(environments,agent_RA,'RA',nb_iters,first_hp_RA,second_hp_R
 
 agent_RALP={'RALP':RmaxLP_Agent}
 RALP_basic_parameters={RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'m':2,'alpha':0.3,'prior_LP':0.001}}
-first_hp_RALP= ['m']+[round(i*0.1,1) for i in range(1,31,3)]
-second_hp_RALP=['alpha']+[round(i*0.1,1) for i in range(1,21,2)]
+first_hp_RALP= ['m']+[round(i*0.1,1) for i in range(5,41,5)]
+second_hp_RALP=['alpha']+[0.1]+[round(i*0.1,1) for i in range(5,41,5)]
 starting_seed=20000
 
 fit_parameters_agent(environments,agent_RALP,'RALP',nb_iters,first_hp_RALP,second_hp_RALP,RALP_basic_parameters,starting_seed,play_params)
@@ -219,8 +219,8 @@ fit_parameters_agent(environments,agent_RALP,'RALP',nb_iters,first_hp_RALP,secon
 agent_BEB={'BEB':BEB_Agent}
 BEB_basic_parameters={BEB_Agent:{'gamma':0.95,'beta':3,'coeff_prior':0.001,'correct_prior':True,'informative':True}}
 
-first_hp_BEB= ['beta']+[round(i*0.1,1) for i in range(1,81,5)]
-second_hp_BEB=['coeff_prior']+[3]
+first_hp_BEB= ['coeff_prior']+[3]
+second_hp_BEB=['beta']+[0.1]+[round(i*0.1,1) for i in range(10,91,10)]
 starting_seed=30000
 
 fit_parameters_agent(environments,agent_BEB,'BEB',nb_iters,first_hp_BEB,second_hp_BEB,BEB_basic_parameters,starting_seed,play_params)
@@ -231,8 +231,8 @@ agent_EBLP={'EBLP':EBLP_Agent}
 EBLP_basic_parameters={EBLP_Agent:{'gamma':0.95,'beta':2.4,'step_update':10,'prior_LP':0.001,'alpha':0.4}}
 
 
-first_hp_EBLP= ['beta']+[round(i*0.1,1) for i in range(5,51,5)]
-second_hp_EBLP=['alpha']+[round(i*0.1,1) for i in range(1,21,2)]
+first_hp_EBLP= ['beta']+[0.1]+[round(i*0.1,1) for i in range(10,91,10)]
+second_hp_EBLP=['alpha']+[0.1]+[round(i*0.1,1) for i in range(10,41,10)]
 starting_seed=40000
 
 fit_parameters_agent(environments,agent_EBLP,'EBLP',nb_iters,first_hp_EBLP,second_hp_EBLP,EBLP_basic_parameters,starting_seed,play_params)
@@ -244,7 +244,7 @@ agent_Epsilon_MB={'Epsilon_MB':Epsilon_MB_Agent}
 Epsilon_MB_basic_parameters={Epsilon_MB_Agent:{'gamma':0.95,'epsilon':0.2}}
 
 first_hp_Epsilon_MB= ['gamma']+[0.95]
-second_hp_Epsilon_MB=['epsilon']+[round(i*0.05,2) for i in range(1,15,1)]
+second_hp_Epsilon_MB=['epsilon']+[0.01]+[round(i*0.1,1) for i in range(1,4,1)]+[round(i*0.1,1) for i in range(5,11,1)]
 starting_seed=50000
 
 fit_parameters_agent(environments,agent_Epsilon_MB,'Epsilon_MB',nb_iters,first_hp_Epsilon_MB,second_hp_Epsilon_MB,Epsilon_MB_basic_parameters,starting_seed,play_params)
@@ -265,8 +265,8 @@ fit_parameters_agent(environments,agent_BEB,'BEB',nb_iters,first_hp_BEB,second_h
 agent_BEB={'BEB':BEB_Agent}
 BEB_basic_parameters={BEB_Agent:{'gamma':0.95,'beta':3,'coeff_prior':0.001,'correct_prior':True,'informative':False}}
 
-first_hp_BEB= ['beta']+[round(i*0.1,1) for i in range(5,51,5)]
-second_hp_BEB=['coeff_prior']+[0.001]
+first_hp_BEB= ['coeff_prior']+[0.001]
+second_hp_BEB=['beta']+[round(i*0.1,1) for i in range(1,101,10)]
 starting_seed=70000
 
 fit_parameters_agent(environments,agent_BEB,'BEB',nb_iters,first_hp_BEB,second_hp_BEB,BEB_basic_parameters,starting_seed,play_params)
