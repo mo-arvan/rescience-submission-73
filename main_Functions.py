@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import time
 from multiprocessing import Pool
 
+plt.rc('text', usetex=True)
+plt.rc('font', family='serif')
 
 from Lopesworld import Lopes_environment
 
@@ -129,12 +131,14 @@ def save_and_plot(pol_opti,CI_pol_opti,pol_real,CI_pol_real,reward,CI_reward,age
     np.save('Results/'+time_end+'_polerror_real.npy',pol_real)
     save_pickle(results,'Results/'+time_end+'.pickle')
     
-    rename={'RA':'R-max','BEB':'BEB','EBLP':'ζ-EB','RALP':'ζ-R-max','Epsilon_MB':'Ɛ-greedy'}
+    rename={'RA':'R-max','BEB':'BEB','EBLP':r'$\zeta-EB','RALP':r'$\zeta$-R-max','Epsilon_MB':r'$\epsilon$-greedy'}
     colors={'RA':'#9d02d7','RALP':'#0000ff','Epsilon_MB':"#ff7763",'BEB':"#ffac1e",'EBLP':"#009435"}
     marker_sizes={'RA':'3','RALP':'3','BEB':'3','EBLP':'3','Epsilon_MB':'3'}
     
     markers={'RA':'^','RALP':'o','BEB':'x','EBLP':'*','Epsilon_MB':'s'}
     length_pol=(play_parameters["trials"]*play_parameters["max_step"])//play_parameters["step_between_VI"]
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
     
     basic_plot([-12.5,0.5],"Steps","Policy value error","Performance of the optimal policy on the learned world")  
     plot_agents(agents_tested,pol_opti,CI_pol_opti,[i*play_parameters["step_between_VI"] for i in range(length_pol)],colors,rename,markers,marker_sizes)
@@ -247,6 +251,7 @@ def compute_optimal_policies():
         environment=Lopes_environment(**environment_parameters[name_environment])
         gridworld=plot_VI(environment,gamma=0.95,accuracy=0.001)
         pygame.image.save(gridworld.screen,"Images/Optimal policy in each environment/VI_"+name_environment+".png")
+
 
 
 ### SAVING PARAMETERS ####
