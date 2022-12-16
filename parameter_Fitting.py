@@ -194,7 +194,7 @@ from agents import Rmax_Agent, BEB_Agent, Epsilon_MB_Agent, EBLP_Agent, RmaxLP_A
 environments_parameters=loading_environments()
 play_params={'trials':100, 'max_step':30, 'screen':False,'photos':[10,20,50,80,99],'accuracy_VI':0.01,'step_between_VI':50}
 environments=["Lopes"]
-nb_iters=1
+nb_iters=20
 
 
 #Reproduction of Lopes et al. (2012)
