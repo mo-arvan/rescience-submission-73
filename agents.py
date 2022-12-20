@@ -77,10 +77,10 @@ class basic_Agent:
         delta=1
         while delta > 1e-2 :
             delta=0
-            """for visited_state in self.nSA:
-                for taken_action in self.nSA[visited_state]:"""
-            for visited_state in [(i,j) for i in range(5) for j in range(5)]:
-                for taken_action in [k for k in range(5)]:
+            """for visited_state in [(i,j) for i in range(5) for j in range(5)]:
+                for taken_action in [k for k in range(5)]:"""
+            for visited_state in self.nSA:
+                for taken_action in self.nSA[visited_state]:
                     value_action=self.Q[visited_state][taken_action]
                     self.Q[visited_state][taken_action]=self.R_VI[visited_state][taken_action]+self.gamma*np.sum([max(self.Q[next_state].values())*self.tSAS[visited_state][taken_action][next_state] 
                                                                                                                   for next_state in self.tSAS[visited_state][taken_action]])

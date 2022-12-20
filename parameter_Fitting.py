@@ -194,7 +194,7 @@ from agents import Rmax_Agent, BEB_Agent, Epsilon_MB_Agent, EBLP_Agent, RmaxLP_A
 environments_parameters=loading_environments()
 play_params={'trials':100, 'max_step':30, 'screen':False,'photos':[10,20,50,80,99],'accuracy_VI':0.01,'step_between_VI':50}
 environments=["Lopes"]
-nb_iters=20
+nb_iters=1
 
 
 #Reproduction of Lopes et al. (2012)
@@ -212,7 +212,7 @@ starting_seed=10000
 fit_parameters_agent(environments,agent_RA,'RA',nb_iters,first_hp_RA,second_hp_RA,RA_basic_parameters,starting_seed,play_params)
 
 #RALP
-
+"""
 agent_RALP={'RALP':RmaxLP_Agent}
 RALP_basic_parameters={RmaxLP_Agent:{'gamma':0.95,'Rmax':1,'step_update':10,'m':2,'alpha':0.3,'prior_LP':0.001}}
 first_hp_RALP= ['m']+[round(i*0.1,1) for i in range(5,41,5)]
@@ -220,6 +220,7 @@ second_hp_RALP=['alpha']+[0.1]+[round(i*0.1,1) for i in range(5,41,5)]
 starting_seed=20000
 
 fit_parameters_agent(environments,agent_RALP,'RALP',nb_iters,first_hp_RALP,second_hp_RALP,RALP_basic_parameters,starting_seed,play_params)
+
 
 #BEB 
 
@@ -280,3 +281,4 @@ fit_parameters_agent(environments,agent_BEB,'BEB',nb_iters,first_hp_BEB,second_h
 
 #Parameter fitting without informative prior Rmax
 starting_seed=80000
+"""
