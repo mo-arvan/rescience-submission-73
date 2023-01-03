@@ -6,7 +6,7 @@ UP,DOWN,LEFT,RIGHT,STAY=0,1,2,3,4
 
 class World_Representation:
 
-    def __init__(self, environment, table=np.zeros((0,0)),actions={},title='Best policy'):
+    def __init__(self, environment, table=np.zeros((0,0)),actions=np.zeros((0,0)),title='Best policy'):
         
         
         self.BLACK = (0, 0, 0)
@@ -18,15 +18,15 @@ class World_Representation:
         
         pygame.init()
         pygame.font.init()
-        self.size = (environment.height*self.size_coeff, environment.width*self.size_coeff)
+        self.size = (5*self.size_coeff, 5*self.size_coeff)
         self.screen = pygame.Surface(self.size)
         
         self.font = pygame.font.SysFont('arial', 18)
 
         pygame.display.set_caption(title)    
 
-        self.grid = environment.grid
-        self.init=(environment.first_location[0],environment.first_location[1])
+        self.grid = np.zeros((5,5))
+        self.init=(0,0)
         self.reward=(2,4)
         self.table=table
         self.actions=actions
@@ -43,30 +43,25 @@ class World_Representation:
         if table.size >0:
             for row in range(len(table)):
                 for col in range(len(table[0])): 
-                    if self.grid[row][col]!=-1:
-                        self.color=(255,max(0,255*(1-table[(row,col)])),max(0,255*(1-table[row,col])))
-                        pygame.draw.rect(self.screen,self.color,[(self.size_coeff)*col+self.margin,(self.size_coeff)*row+self.margin,
+                    self.color=(255,max(0,255*(1-table[(row,col)])),max(0,255*(1-table[row,col])))
+                    pygame.draw.rect(self.screen,self.color,[(self.size_coeff)*col+self.margin,(self.size_coeff)*row+self.margin,
                                                                  self.size_coeff-self.margin,self.size_coeff-self.margin])
-        #Directions of optimal policy
-        if actions!={}:
-            for (row,col),value in actions.items():
-                    if self.grid[row][col]!=-1:
-                        best_action=value
-                        x,y=50*col+27.5,50*row+27.5
-                        if best_action==STAY:
-                            pygame.draw.circle(self.screen, self.BLACK, (x,y), 8)
-                        if best_action != STAY : 
-                            angles={UP:0,DOWN:180,RIGHT:270,LEFT:90}
-                            correction={UP:(0,5),DOWN:(0,-5),LEFT:(5,0),RIGHT:(-5,0)}
-                            x+=correction[best_action][0]
-                            y+=correction[best_action][1]
-                            self.DrawArrow(x, y,self.BLACK,angles[best_action])
+                    x,y=50*col+27.5,50*row+27.5
+                    best_action=actions[row,col]
+                    if best_action==STAY:
+                        pygame.draw.circle(self.screen, self.BLACK, (x,y), 8)
+                    if best_action!= STAY : 
+                        angles_arrow=[0,180,270,90]
+                        arrow_alignment={UP:(0,5),DOWN:(0,-5),LEFT:(5,0),RIGHT:(-5,0)}
+                        x+=arrow_alignment[best_action][0]
+                        y+=arrow_alignment[best_action][1]
+                        self.DrawArrow(x, y,self.BLACK,angles_arrow[best_action])
         
         #Starting and goal state : S and G
         starting_state=self.font.render("S",1,self.BLACK)
         self.screen.blit(starting_state,(35,30))
         goal_state=self.font.render("G",1,self.BLACK)
-        self.screen.blit(goal_state,(35+4*50,30+2*50))
+        self.screen.blit(goal_state,(235,130))
                     
 
     def DrawArrow(self,x,y,color,angle=0):

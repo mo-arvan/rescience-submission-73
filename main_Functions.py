@@ -48,9 +48,10 @@ def getting_simulations_to_do(names_environments=[],agents_tested={},number_of_i
 
 ### Play functions ###
 
-def play(environment, agent, trials=100, max_step=30, screen=False,photos=[10,20,50,80,99],accuracy_VI=0.01,step_between_VI=50):
+def play(environment, agent, trials=100, max_step=30, screen=False,photos=[10,20,50,80,99],accuracy_VI=1e-3,step_between_VI=50):
     reward_per_episode, optimal_policy_value_error, real_policy_value_error=[],[],[]
     val_iteration,_=value_iteration(environment,agent.gamma,accuracy_VI)
+
     for trial in range(trials):
         if screen : take_picture(agent,trial,environment,photos) 
         cumulative_reward, step, game_over= 0,0,False
@@ -58,8 +59,8 @@ def play(environment, agent, trials=100, max_step=30, screen=False,photos=[10,20
             if environment.total_steps==900:
                     val_iteration,_=value_iteration(environment,agent.gamma,accuracy_VI)
             if agent.step_counter%step_between_VI==0:
-                optimal_policy_value_error.append(policy_evaluation(environment,get_optimal_policy(agent,environment,agent.gamma,accuracy_VI),agent.gamma,accuracy_VI)[environment.first_location]-val_iteration[environment.first_location]) 
-                real_policy_value_error.append(policy_evaluation(environment,get_agent_current_policy(agent,environment,agent.gamma,accuracy_VI),agent.gamma,accuracy_VI)[environment.first_location]-val_iteration[environment.first_location])
+                optimal_policy_value_error.append(policy_evaluation(environment,get_optimal_policy(agent,agent.gamma,accuracy_VI),agent.gamma,accuracy_VI)[environment.first_location]-val_iteration[environment.first_location]) 
+                real_policy_value_error.append(policy_evaluation(environment,get_agent_current_policy(agent),agent.gamma,accuracy_VI)[environment.first_location]-val_iteration[environment.first_location])
             old_state = environment.current_location
             action = agent.choose_action() 
             reward , new_state = environment.make_step(action)            
@@ -131,7 +132,7 @@ def save_and_plot(pol_opti,CI_pol_opti,pol_real,CI_pol_real,reward,CI_reward,age
     np.save('Results/'+time_end+'_polerror_real.npy',pol_real)
     save_pickle(results,'Results/'+time_end+'.pickle')
     
-    rename={'RA':'R-max','BEB':'BEB','EBLP':r'$\zeta-EB','RALP':r'$\zeta$-R-max','Epsilon_MB':r'$\epsilon$-greedy'}
+    rename={'RA':'R-max','BEB':'BEB','EBLP':r'$\zeta$-EB','RALP':r'$\zeta$-R-max','Epsilon_MB':r'$\epsilon$-greedy'}
     colors={'RA':'#9d02d7','RALP':'#0000ff','Epsilon_MB':"#ff7763",'BEB':"#ffac1e",'EBLP':"#009435"}
     marker_sizes={'RA':'3','RALP':'3','BEB':'3','EBLP':'3','Epsilon_MB':'3'}
     
@@ -202,46 +203,34 @@ def merging_two_images(environment,img1,img2,path):
     image1 = pygame.image.load(img1)
     image2 = pygame.image.load(img2)
 
-    screen = pygame.Surface((environment.height*100+200,environment.height*50+100))
+    screen = pygame.Surface((700,350))
     
     screen.fill((0,0,0))   
     screen.blit(image1, (50,  50))
-    screen.blit(image2, (environment.height*50+150, 50))
+    screen.blit(image2, (400, 50))
 
     pygame.image.save(screen,path)
 
         
-def get_normalized_best_values(table,environment):
-    max_every_state=np.zeros((environment.height,environment.width))
-    action_every_state=dict()
-    for state in table.keys():
-        q_values = table[state]
-        max_value_state=max(q_values.values())
-        max_every_state[state]=max_value_state
-        best_action = np.random.choice([k for k, v in q_values.items() if v == max_value_state])
-        action_every_state[state]=best_action
-    mini=np.min(max_every_state)
-    max_every_state-=mini
-    maxi=np.max(max_every_state)
-    if maxi !=0 : max_every_state/=maxi     
-    return max_every_state,action_every_state
+def get_normalized_best_values(table):
+    best_values=np.max(table,axis=1)-np.min(table,axis=1)
+    best_actions=np.argmax(table+1e-5*np.random.random(table.shape),axis=1)
+    maximal_value=np.max(best_values)
+    if maximal_value !=0 : best_values/=maximal_value     
+    return best_values,best_actions
  
 def picture_world(environment,table,bonus=False,norm=1):       
-    max_Q,best_actions=get_normalized_best_values(table,environment)
+    max_Q,best_actions=get_normalized_best_values(table)
     if bonus : max_Q/=norm
-    return World_Representation(environment,max_Q,best_actions)
+    return World_Representation(environment,max_Q.reshape((5,5)),best_actions.reshape((5,5)))
 
 
 def plot_VI(environment,gamma,accuracy): #only in gridworlds
     V,action=value_iteration(environment,gamma,accuracy)
-    V_2=np.zeros((environment.height,environment.width))
-    for state,value in V.items():
-        V_2[state]=value
-        if V_2[state]<0:V_2[state]=0
-    V_2=V_2-np.min(V_2)
-    max_value=np.max(V_2)
-    V_2=V_2/max_value
-    return World_Representation(environment,V_2,action)
+    V=V-np.min(V)
+    max_value=np.max(V)
+    if max_value != 0  : V=V/max_value
+    return World_Representation(environment,V.reshape((5,5)),action.reshape((5,5)))
 
 def compute_optimal_policies():
     environment_parameters=loading_environments()
@@ -249,7 +238,7 @@ def compute_optimal_policies():
         if 'transitions_after_change' in environment_parameters[name_environment].keys():
             environment_parameters[name_environment]['transitions']=environment_parameters[name_environment]['transitions_after_change']
         environment=Lopes_environment(**environment_parameters[name_environment])
-        gridworld=plot_VI(environment,gamma=0.95,accuracy=0.001)
+        gridworld=plot_VI(environment,gamma=0.95,accuracy=1e-3)
         pygame.image.save(gridworld.screen,"Images/Optimal policy in each environment/VI_"+name_environment+".png")
 
 
