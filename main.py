@@ -10,6 +10,7 @@ environments_parameters=loading_environments()
 #agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'EBLP':EBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
 agents={'RA':Rmax_Agent,'RALP':RmaxLP_Agent,'BEB':BEB_Agent,'EBLP':EBLP_Agent,'Epsilon_MB':Epsilon_MB_Agent}
 
+
 #environments=["Non_stat_article_-1_{0}".format(world)+'_{0}'.format(non_stat) for world in range(1,11) for non_stat in range(1,11)]
 
 ### Reproduction of the first figure of Lopes et al. (2012) ###
