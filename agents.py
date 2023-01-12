@@ -52,7 +52,7 @@ class basic_Agent:
     
     
     def value_iteration(self):
-        #visited=np.where(self.nSA>=0,1,0)
+        #visited=np.where(self.nSA>=0,1,0) #wihout computing the Q-values only for visited (state,action) couples
         visited=np.where(self.nSA>=1,1,0)
         threshold=1e-3
         converged=False
@@ -85,20 +85,21 @@ class Epsilon_MB_Agent(basic_Agent):
 
 class Rmax_Agent(basic_Agent):
     
-    def __init__(self, environment,gamma,Rmax,m,m_uncertain_states,correct_prior):
+    def __init__(self, environment,gamma,Rmax,m,m_uncertain_states,condition='informative'):
         super().__init__(environment,gamma)
         self.Rmax=Rmax
         self.m = m
         self.m_uncertain_states=m_uncertain_states
-        self.correct_prior=correct_prior
         self.R_VI=np.ones((self.size_environment,self.size_actions))*self.Rmax
-        if self.correct_prior : 
+        if condition == 'informative' : 
             self.max_visits=np.ones((self.size_environment,self.size_actions))*self.m
             for state in self.environment.uncertain_states:
                 self.max_visits[state]=np.ones(self.size_actions)*self.m_uncertain_states
-        else : 
+        elif condition == 'wrong_prior' : 
             self.max_visits=np.random.randint(self.m,self.m_uncertain_states,((self.size_environment,self.size_actions)))
-        
+        elif condition == 'uninformative':
+            self.max_visits=np.ones((self.size_environment,self.size_actions))*self.m
+        else : raise ValueError("The condition "+str(condition)+" does not exist. The conditions are: informative, wrong_prior or uninformative.")
         
     def compute_reward_VI(self,old_state, reward, action):
         if self.nSA[old_state][action]>=self.max_visits[old_state][action]: self.R_VI[old_state][action]=self.R[old_state][action]
@@ -107,22 +108,20 @@ class Rmax_Agent(basic_Agent):
 
 class BEB_Agent(basic_Agent):
     
-    def __init__(self,environment, gamma, beta,coeff_prior,informative,correct_prior):
+    def __init__(self,environment, gamma, beta,coeff_prior,condition='informative'):
         super().__init__(environment,gamma)
+        
         self.beta=beta
-        self.correct_prior=correct_prior
         self.coeff_prior=coeff_prior
-        self.informative=informative
         
-        if self.informative :
+        if condition =='informative':
             self.prior=self.environment.transitions*self.coeff_prior+1e-5
-        else : 
+        elif condition =='uninformative' : 
             self.prior=np.ones((self.size_environment,self.size_actions,self.size_environment))*self.coeff_prior
-        
-        if not self.correct_prior: 
-            max_prior=np.max(self.prior)
+        elif condition == 'wrong_prior':
+            max_prior=np.max(self.environment.transitions*self.coeff_prior+1e-5)
             self.prior=np.random.uniform(self.coeff_prior*1e-5,max_prior,((self.size_environment,self.size_actions,self.size_environment)))
-            
+        else : raise ValueError("The condition "+str(condition)+" does not exist. The conditions are: informative, wrong_prior or uninformative")
         self.prior_0=self.prior.sum(axis=2)
         self.bonus=np.ones((self.size_environment,self.size_actions))*self.beta/(1+self.prior_0)
         self.Q=np.ones((self.size_environment,self.size_actions))*(1+self.beta)/(1-self.gamma)
@@ -164,7 +163,7 @@ class Learning_Progress_Agent(basic_Agent):
 
     def cross_validation(self,array_of_states):
         sum_count=np.sum(array_of_states)
-        sum_prior=sum_count + len(self.environment.states)*self.prior_LP
+        sum_prior=sum_count + self.size_environment*self.prior_LP
         log_value=-np.log(array_of_states-1+self.prior_LP/(sum_prior-1))
         cross_validation=np.sum(log_value)/sum_count
         variance_cv=np.sum(log_value-cross_validation)**2/sum_count
@@ -177,6 +176,7 @@ class EBLP_Agent(Learning_Progress_Agent):
         super().__init__(environment,gamma,step_update,alpha,prior_LP)
         self.beta=beta
         self.bonus=np.ones((self.size_environment,self.size_actions))*self.beta/(1+1/np.sqrt(self.LP))
+        self.Q=np.ones((self.size_environment,self.size_actions))*(1+self.beta)/(1-self.gamma)
         
     def compute_reward_VI(self,old_state, reward, action):
         self.bonus[old_state][action]=self.beta/(1+1/np.sqrt(self.LP[old_state][action]))

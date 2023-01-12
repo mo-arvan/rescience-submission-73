@@ -73,8 +73,8 @@ def save_rewards(bonus=1,malus=-0.1):
 
 #Validity of the worlds generated     
 
-from policy_Functions2 import value_iteration
-from Lopesworld2 import Lopes_environment
+from policy_Functions import value_iteration
+from Lopesworld import Lopes_environment
 
 #Use only worlds in which the optimal path corresponds to the one in the article    
 def valid_policy(policy):
@@ -153,5 +153,5 @@ generate_strong_non_stationarity_(world_number=10,number_of_worlds=10,malus=-1)
 
 #Checking how many worlds are valid out of 1000 for each condition
 np.random.seed(7)
-proportion_of_valid_worlds(iterations=1000,alphas=[1,0.1],malus=-0.1,bonus=1)
-proportion_of_valid_worlds(iterations=1000,alphas=[1,0.1],malus=-3,bonus=1)
+proportion_of_valid_worlds(iterations=5000,alphas=[1,0.1],malus=-0.1,bonus=1)
+proportion_of_valid_worlds(iterations=5000,alphas=[1,0.1],malus=-1,bonus=1)

@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 import time
 from multiprocessing import Pool
 
-plt.rc('text', usetex=True)
-plt.rc('font', family='serif')
 
 from Lopesworld import Lopes_environment
 
@@ -17,16 +15,21 @@ from policy_Functions import value_iteration,get_optimal_policy,policy_evaluatio
 
 
 def loading_environments():
+    
     environments_parameters={}
     reward_0_1=np.load('Environments/Rewards_Lopes_1_-0.1.npy',allow_pickle=True)
     reward_1=np.load('Environments/Rewards_Lopes_1_-1.npy',allow_pickle=True)
+    
     transitions_lopes=np.load('Environments/Transitions_Lopes_-0.1_1.npy',allow_pickle=True)
     environments_parameters['Lopes']={'transitions':transitions_lopes,'rewards':reward_0_1}
+    
     for number_non_stationarity in range(1,21):
         transitions_non_stat_article=np.load('Environments/Transitions_non_stat_article-0.1_1_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
         transitions_strong_non_stat=np.load('Environments/Transitions_strong_non_stat_-0.1_1_'+str(number_non_stationarity)+'.npy',allow_pickle=True)
         environments_parameters["Non_stat_article_-0.1_{0}".format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_0_1,'transitions_after_change':transitions_non_stat_article}
         environments_parameters["Non_stat_strong_-0.1_{0}".format(number_non_stationarity)]={'transitions':transitions_lopes,'rewards':reward_0_1,'transitions_after_change':transitions_strong_non_stat}
+    
+    
     for number_world in range(1,11):
         transitions_lopes=np.load('Environments/Transitions_Lopes_-1_'+str(number_world)+'.npy',allow_pickle=True)
         environments_parameters['Stationary_Lopes_-1_'+str(number_world)]={'transitions':transitions_lopes,'rewards':reward_1}
@@ -38,6 +41,8 @@ def loading_environments():
     
     return environments_parameters
 
+
+
 def getting_simulations_to_do(names_environments=[],agents_tested={},number_of_iterations=1):
     every_simulation=[]
     for name_environment in names_environments:   
@@ -45,6 +50,8 @@ def getting_simulations_to_do(names_environments=[],agents_tested={},number_of_i
             for iteration in range(number_of_iterations):
                     every_simulation.append((name_environment,name_agent,agent,iteration))
     return every_simulation  
+
+
 
 ### Play functions ###
 
@@ -73,10 +80,11 @@ def play(environment, agent, trials=100, max_step=30, screen=False,photos=[10,20
         reward_per_episode.append(cumulative_reward)
     return reward_per_episode,optimal_policy_value_error,real_policy_value_error
 
-environment_parameters=loading_environments()
+
 
 def play_with_params(name_environment,name_agent,agent,iteration,play_parameters,seed,agent_parameters):
     np.random.seed(seed)
+    environment_parameters=loading_environments()
     environment=Lopes_environment(**environment_parameters[name_environment])
     globals()[name_agent]=agent(environment,**agent_parameters[agent])
     return (name_agent,name_environment,iteration),play(environment,globals()[name_agent],**play_parameters)
@@ -132,31 +140,29 @@ def save_and_plot(pol_opti,CI_pol_opti,pol_real,CI_pol_real,reward,CI_reward,age
     np.save('Results/'+time_end+'_polerror_real.npy',pol_real)
     save_pickle(results,'Results/'+time_end+'.pickle')
     
-    rename={'RA':'R-max','BEB':'BEB','EBLP':r'$\zeta$-EB','RALP':r'$\zeta$-R-max','Epsilon_MB':r'$\epsilon$-greedy'}
+    rename={'RA':'R-max','BEB':'BEB','EBLP':'ζ-EB','RALP':'ζ-R-max','Epsilon_MB':'ε-greedy'}
     colors={'RA':'#9d02d7','RALP':'#0000ff','Epsilon_MB':"#ff7763",'BEB':"#ffac1e",'EBLP':"#009435"}
     marker_sizes={'RA':'3','RALP':'3','BEB':'3','EBLP':'3','Epsilon_MB':'3'}
     
     markers={'RA':'^','RALP':'o','BEB':'x','EBLP':'*','Epsilon_MB':'s'}
     length_pol=(play_parameters["trials"]*play_parameters["max_step"])//play_parameters["step_between_VI"]
-    plt.rc('text', usetex=True)
-    plt.rc('font', family='serif')
     
     basic_plot([-12.5,0.5],"Steps","Policy value error","Performance of the optimal policy on the learned world")  
     plot_agents(agents_tested,pol_opti,CI_pol_opti,[i*play_parameters["step_between_VI"] for i in range(length_pol)],colors,rename,markers,marker_sizes)
     plt.legend()
-    plt.savefig('Results/pol_error_opti'+time_end+names_environments[0]+'.png')
+    plt.savefig('Results/pol_error_opti'+time_end+names_environments[0]+'.pdf')
 
     
     basic_plot([-12.5,0.5],"Steps","Policy value error","Performance of the agent policy")
     plot_agents(agents_tested,pol_real,CI_pol_real,[i*play_parameters["step_between_VI"] for i in range(length_pol)],colors,rename,markers,marker_sizes)
     plt.legend()
-    plt.savefig('Results/pol_error_real'+time_end+names_environments[0]+'.png')
+    plt.savefig('Results/pol_error_real'+time_end+names_environments[0]+'.pdf')
     
     
     basic_plot([-1,26],"Trials","Reward","Reward over time")
     plot_agents(agents_tested,reward,CI_reward,[i for i in range(play_parameters["trials"])],colors,rename,markers,marker_sizes)
     plt.legend()
-    plt.savefig('Results/Rewards'+time_end+names_environments[0]+'.png')
+    plt.savefig('Results/Rewards'+time_end+names_environments[0]+'.pdf')
 
 def basic_plot(ylim,xlabel,ylabel,title):
     fig=plt.figure(dpi=300)
@@ -203,11 +209,11 @@ def merging_two_images(environment,img1,img2,path):
     image1 = pygame.image.load(img1)
     image2 = pygame.image.load(img2)
 
-    screen = pygame.Surface((700,350))
+    screen = pygame.Surface((1150,600))
     
     screen.fill((0,0,0))   
     screen.blit(image1, (50,  50))
-    screen.blit(image2, (400, 50))
+    screen.blit(image2, (650, 50))
 
     pygame.image.save(screen,path)
 
@@ -240,7 +246,6 @@ def compute_optimal_policies():
         environment=Lopes_environment(**environment_parameters[name_environment])
         gridworld=plot_VI(environment,gamma=0.95,accuracy=1e-3)
         pygame.image.save(gridworld.screen,"Images/Optimal policy in each environment/VI_"+name_environment+".png")
-
 
 
 ### SAVING PARAMETERS ####
