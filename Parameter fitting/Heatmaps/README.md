@@ -1,0 +1,1 @@
+This directory contains the 2D parameter fitting. For every policy value error (optimal or real agent policy), we compute the mean value error.
