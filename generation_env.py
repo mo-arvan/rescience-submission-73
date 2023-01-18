@@ -151,7 +151,8 @@ generate_non_stationarity_article(world_number=10,number_of_worlds=10,malus=-1)
 np.random.seed(6)
 generate_strong_non_stationarity_(world_number=10,number_of_worlds=10,malus=-1)
 
+
 #Checking how many worlds are valid out of 1000 for each condition
-np.random.seed(7)
+np.random.seed(10)
 proportion_of_valid_worlds(iterations=5000,alphas=[1,0.1],malus=-0.1,bonus=1)
 proportion_of_valid_worlds(iterations=5000,alphas=[1,0.1],malus=-1,bonus=1)

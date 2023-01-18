@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class basic_Agent:
 
     def __init__(self,environment, gamma=0.95):
@@ -68,7 +67,7 @@ class basic_Agent:
         pass
     
     
-class Epsilon_MB_Agent(basic_Agent):
+class Epsilon_MB(basic_Agent):
     
     def __init__(self, environment, gamma,epsilon):
         self.epsilon = epsilon
@@ -83,7 +82,7 @@ class Epsilon_MB_Agent(basic_Agent):
             action= np.random.choice(np.flatnonzero(q_values == q_values.max()))
         return action
 
-class Rmax_Agent(basic_Agent):
+class Rmax(basic_Agent):
     
     def __init__(self, environment,gamma,Rmax,m,m_uncertain_states,condition='informative'):
         super().__init__(environment,gamma)
@@ -106,7 +105,7 @@ class Rmax_Agent(basic_Agent):
         else : self.R_VI[old_state][action]=self.Rmax
     
 
-class BEB_Agent(basic_Agent):
+class BEB(basic_Agent):
     
     def __init__(self,environment, gamma, beta,coeff_prior,condition='informative'):
         super().__init__(environment,gamma)
@@ -120,7 +119,7 @@ class BEB_Agent(basic_Agent):
             self.prior=np.ones((self.size_environment,self.size_actions,self.size_environment))*self.coeff_prior
         elif condition == 'wrong_prior':
             max_prior=np.max(self.environment.transitions*self.coeff_prior+1e-5)
-            self.prior=np.random.uniform(self.coeff_prior*1e-5,max_prior,((self.size_environment,self.size_actions,self.size_environment)))
+            self.prior=np.random.uniform(1e-5,max_prior,((self.size_environment,self.size_actions,self.size_environment)))
         else : raise ValueError("The condition "+str(condition)+" does not exist. The conditions are: informative, wrong_prior or uninformative")
         self.prior_0=self.prior.sum(axis=2)
         self.bonus=np.ones((self.size_environment,self.size_actions))*self.beta/(1+self.prior_0)
@@ -138,7 +137,7 @@ class BEB_Agent(basic_Agent):
     
 
 
-class Learning_Progress_Agent(basic_Agent):
+class Learning_Progress(basic_Agent):
     
     def __init__(self,environment, gamma, step_update,alpha,prior_LP):
         super().__init__(environment,gamma)
@@ -169,7 +168,7 @@ class Learning_Progress_Agent(basic_Agent):
         variance_cv=np.sum(log_value-cross_validation)**2/sum_count
         return cross_validation,variance_cv
 
-class EBLP_Agent(Learning_Progress_Agent):
+class EBLP(Learning_Progress):
     
     def __init__(self,environment, gamma, beta,step_update,alpha,prior_LP):
         
@@ -183,7 +182,7 @@ class EBLP_Agent(Learning_Progress_Agent):
         self.R_VI[old_state][action]=self.R[old_state][action]+self.bonus[old_state][action]
         
             
-class RmaxLP_Agent(Learning_Progress_Agent):
+class RmaxLP(Learning_Progress):
 
     def __init__(self,environment,gamma,step_update,alpha,prior_LP,Rmax,m):
               
