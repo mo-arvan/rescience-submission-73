@@ -2,7 +2,7 @@ from main_Functions import evaluate_agents
 
 
 #agents=['R-max','ζ-R-max','BEB','ζ-EB','ε-greedy']
-agents=['ζ-R-max']
+agents=['R-max']
 
 play_parameters={'trials':100, 'max_step':30, 'screen':0,'photos':[1,2,3,10,20,30,40,50,60,70,80,99],'accuracy_VI':0.001,'step_between_VI':50}
 
@@ -11,7 +11,7 @@ play_parameters={'trials':100, 'max_step':30, 'screen':0,'photos':[1,2,3,10,20,3
 
 
 agent_parameters={'ε-greedy':{'gamma':0.95,'epsilon':0.3},
-            'R-max':{'gamma':0.95, 'm':15,'Rmax':1,'m_uncertain_states':30,'condition':'informative'},
+            'R-max':{'gamma':0.95, 'm':40,'Rmax':1,'m_uncertain_states':40,'condition':'informative'},
             'BEB':{'gamma':0.95,'beta':7,'coeff_prior':2,'condition':'informative'},
             'ζ-EB':{'gamma':0.95,'beta':7,'step_update':10,'alpha':1,'prior_LP':0.01},
             'ζ-R-max':{'gamma':0.95,'Rmax':1,'m':2,'step_update':10,'alpha':1,'prior_LP':0.01}}

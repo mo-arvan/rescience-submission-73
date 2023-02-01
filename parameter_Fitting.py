@@ -18,13 +18,13 @@ def range_parameters_agent(list1,list2):
     return list_of_params
 
 
-def get_agent_parameters(basic_parameters,list_1,list_2):
+def get_agent_parameters(name_agent,basic_parameters,list_1,list_2):
     agent_parameters=[]
     list_of_new_parameters=range_parameters_agent(list_1, list_2)
     for dic in list_of_new_parameters:
         d=copy.deepcopy(basic_parameters)
         for key,value in dic.items() : 
-            d[key]=value
+            d[name_agent][key]=value
         agent_parameters.append(d)
     return agent_parameters
 
@@ -125,7 +125,7 @@ def fit_parameters_agent(environments,name_agent,nb_iters,first_hp,second_hp,age
     
     every_simulation=getting_simulations_to_do(environments,[name_agent],range(nb_iters),first_hp[1:],second_hp[1:])
     seeds_agent=[starting_seed+i for i in range(len(every_simulation))]
-    agent_parameters=nb_iters*len(environments)*get_agent_parameters(agent_basic_parameters,first_hp, second_hp)
+    agent_parameters=nb_iters*len(environments)*get_agent_parameters(name_agent,agent_basic_parameters,first_hp, second_hp)
     opti_pol_errors,real_pol_errors,reward_pol_errors=main_function(seeds_agent,every_simulation,play_parameters,agent_parameters)
     mean_pol_opti,CI_pol_opti,mean_pol_real,CI_pol_real=extracting_results(opti_pol_errors,real_pol_errors,environments,name_agent,nb_iters,first_hp[1:],second_hp[1:])
     time_end=save_results_parametter_fitting(mean_pol_opti,CI_pol_opti,mean_pol_real,CI_pol_real,name_agent,first_hp,second_hp,play_parameters,environments)
@@ -154,8 +154,8 @@ agent_parameters={'ε-greedy':{'gamma':0.95,'epsilon':0.3},
 agent_name='R-max'
 starting_seed=10000
 
-first_hp= ['m']+[i for i in range(5,41,5)]
-second_hp=['m_uncertain_states']+[i for i in range(5,41,5)]
+first_hp= ['m']+[1]+[i for i in range(5,41,5)]
+second_hp=['m_uncertain_states']+[1]+[i for i in range(5,41,5)]
 fit_parameters_agent(environments,agent_name,nb_iters,first_hp,second_hp,{agent_name:agent_parameters[agent_name]},starting_seed,play_params)
 
 
