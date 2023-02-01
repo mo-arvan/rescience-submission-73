@@ -18,7 +18,6 @@ class basic_Agent:
         
         self.tSAS = np.ones((self.size_environment,self.size_actions,self.size_environment))/self.size_environment
         self.Q = np.ones((self.size_environment,self.size_actions))/(1-self.gamma)
-        
         self.step_counter=0
         
                     
@@ -124,7 +123,7 @@ class BEB(basic_Agent):
         self.prior_0=self.prior.sum(axis=2)
         self.bonus=np.ones((self.size_environment,self.size_actions))*self.beta/(1+self.prior_0)
         self.Q=np.ones((self.size_environment,self.size_actions))*(1+self.beta)/(1-self.gamma)
-    
+        
     def compute_reward_VI(self,old_state, reward, action):
         self.prior_0[old_state][action]+=1
         self.bonus[old_state][action]=self.beta/(1+self.prior_0[old_state][action])
@@ -180,7 +179,7 @@ class EBLP(Learning_Progress):
     def compute_reward_VI(self,old_state, reward, action):
         self.bonus[old_state][action]=self.beta/(1+1/np.sqrt(self.LP[old_state][action]))
         self.R_VI[old_state][action]=self.R[old_state][action]+self.bonus[old_state][action]
-        
+
             
 class RmaxLP(Learning_Progress):
 
