@@ -151,7 +151,6 @@ agent_parameters={'ε-greedy':{'gamma':0.95,'epsilon':0.3},
             'ζ-R-max':{'gamma':0.95,'Rmax':1,'m':2,'step_update':10,'alpha':1,'prior_LP':0.01}}
 
 
-
 agent_name='R-max'
 starting_seed=10000
 
@@ -169,7 +168,6 @@ agent_parameters['R-max']['condition']='uninformative'
 first_hp= ['gamma']+[0.95]
 second_hp=['m']+[i for i in range(2,21,2)]
 fit_parameters_agent(environments,agent_name,nb_iters,first_hp,second_hp,{agent_name:agent_parameters[agent_name]},starting_seed,play_params)
-
 
 
 agent_name='ζ-R-max'
