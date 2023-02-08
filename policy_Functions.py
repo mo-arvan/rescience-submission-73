@@ -50,7 +50,7 @@ def get_optimal_policy(agent,gamma,accuracy):
 
 def get_agent_current_policy(agent):
     policy=np.zeros((25,5))
-    if type(agent).__name__=='Epsilon_MB_Agent':
+    if type(agent).__name__=='Epsilon_MB':
         policy+=agent.epsilon/5
         policy[np.arange(25),np.argmax(agent.Q+1e-5*np.random.random(agent.Q.shape),axis=1)]+=1-agent.epsilon
     else : policy[np.arange(25),np.argmax(agent.Q+1e-5*np.random.random(agent.Q.shape),axis=1)]=1

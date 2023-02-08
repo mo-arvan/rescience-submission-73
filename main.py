@@ -2,20 +2,18 @@ from main_Functions import evaluate_agents
 
 
 #agents=['R-max','ζ-R-max','BEB','ζ-EB','ε-greedy']
-agents=['R-max']
+agents=['R-max','ζ-R-max','BEB','ζ-EB','ε-greedy']
 
 play_parameters={'trials':100, 'max_step':30, 'screen':0,'photos':[1,2,3,10,20,30,40,50,60,70,80,99],'accuracy_VI':0.001,'step_between_VI':50}
 
 
 ### Environment of Lopes et al. (2012)
 
-
 agent_parameters={'ε-greedy':{'gamma':0.95,'epsilon':0.3},
-            'R-max':{'gamma':0.95, 'm':40,'Rmax':1,'m_uncertain_states':40,'condition':'informative'},
+            'R-max':{'gamma':0.95, 'm':8,'Rmax':1,'m_uncertain_states':12,'condition':'informative'},
             'BEB':{'gamma':0.95,'beta':7,'coeff_prior':2,'condition':'informative'},
-            'ζ-EB':{'gamma':0.95,'beta':7,'step_update':10,'alpha':1,'prior_LP':0.01},
+            'ζ-EB':{'gamma':0.95,'beta':9,'step_update':10,'alpha':2,'prior_LP':0.01},
             'ζ-R-max':{'gamma':0.95,'Rmax':1,'m':2,'step_update':10,'alpha':1,'prior_LP':0.01}}
-
 
 #Stationary environment
 environments=['Lopes']
@@ -25,7 +23,7 @@ starting_seed=100
 
 evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,starting_seed)
 
-"""
+
 #Wrong prior
 starting_seed=200
 agent_parameters['R-max']['condition']='wrong_prior'
@@ -33,14 +31,14 @@ agent_parameters['BEB']['condition']='wrong_prior'
 
 evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,starting_seed)
 
+agent_parameters['R-max']['condition']='informative'
+agent_parameters['BEB']['condition']='informative'
 
 #Non-stationarity from the article
 starting_seed=300
 nb_iters=5
 environments=["Non_stat_article_-0.1_{0}".format(non_stat)for non_stat in range(1,21)]
 
-agent_parameters['R-max']['condition']='informative'
-agent_parameters['BEB']['condition']='informative'
 
 evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,starting_seed)
 
@@ -51,6 +49,8 @@ environments=["Non_stat_strong_-0.1_{0}".format(non_stat)for non_stat in range(1
 
 evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,starting_seed)
 
+
+starting_seed=400
 play_parameters['trials']=200
 evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,starting_seed)
 play_parameters['trials']=100
@@ -70,13 +70,12 @@ evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,st
 
 
 
-
 ### With the parameters to maximize the real agent policy (instead of the optimal on the sampled transitions/rewards) ###
 
 agent_parameters={'ε-greedy':{'gamma':0.95,'epsilon':0.01},
             'R-max':{'gamma':0.95, 'm':8,'Rmax':1,'m_uncertain_states':12,'condition':'informative'},
             'BEB':{'gamma':0.95,'beta':3,'coeff_prior':2,'condition':'informative'},
-            'ζ-EB':{'gamma':0.95,'beta':0.5,'step_update':10,'alpha':2.5,'prior_LP':0.01},
+            'ζ-EB':{'gamma':0.95,'beta':1,'step_update':10,'alpha':1.5,'prior_LP':0.01},
             'ζ-R-max':{'gamma':0.95,'Rmax':1,'m':2,'step_update':10,'alpha':1,'prior_LP':0.01}}
 
 environments=["Lopes"]
@@ -120,16 +119,13 @@ evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,st
 
 
 
-
-
 ### Replication with negative reward of -1 ###
 
-
-agent_parameters={'ε-greedy':{'gamma':0.95,'epsilon':0.1},
+agent_parameters={'ε-greedy':{'gamma':0.95,'epsilon':0.3},
             'R-max':{'gamma':0.95, 'm':8,'Rmax':1,'m_uncertain_states':12,'condition':'informative'},
-            'BEB':{'gamma':0.95,'beta':6,'coeff_prior':2,'condition':'informative'},
-            'ζ-EB':{'gamma':0.95,'beta':7,'step_update':10,'alpha':1,'prior_LP':0.01},
-            'ζ-R-max':{'gamma':0.95,'Rmax':1,'m':2.4,'step_update':10,'alpha':1.6,'prior_LP':0.01}}
+            'BEB':{'gamma':0.95,'beta':7,'coeff_prior':2,'condition':'informative'},
+            'ζ-EB':{'gamma':0.95,'beta':9,'step_update':10,'alpha':2,'prior_LP':0.01},
+            'ζ-R-max':{'gamma':0.95,'Rmax':1,'m':2,'step_update':10,'alpha':1,'prior_LP':0.01}}
 
 
 #Stationary environment
@@ -138,6 +134,17 @@ starting_seed=1000
 environments=['Stationary_Lopes_-1_'+str(number_world) for number_world in range(1,11)]
 nb_iters=10
 evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,starting_seed)
+
+
+#Wrong prior
+starting_seed=1200
+agent_parameters['R-max']['condition']='wrong_prior'
+agent_parameters['BEB']['condition']='wrong_prior'
+
+evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,starting_seed)
+
+agent_parameters['R-max']['condition']='informative'
+agent_parameters['BEB']['condition']='informative'
 
 #Small non-stationarity
 starting_seed=1500
@@ -149,4 +156,3 @@ evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,st
 starting_seed=2000
 environments=["Non_stat_strong_-1_{0}".format(world)+'_{0}'.format(non_stat) for world in range(1,11) for non_stat in range(1,11)]
 evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,starting_seed)
-"""

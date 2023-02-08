@@ -151,25 +151,25 @@ def save_and_plot(optimal_stats,real_stats,rewards_stats,agents_tested,names_env
     
     length_pol=(play_parameters["trials"]*play_parameters["max_step"])//play_parameters["step_between_VI"]
     
-    plot1D([-12.5,0.5],"Steps","Policy value error","Performance of the optimal policy on the learned world")  
+    plot1D([-12.5,0.5],"Steps","Policy value error")  
     plot_agents(agents_tested,pol_opti,SEM_pol_opti,[i*play_parameters["step_between_VI"] for i in range(length_pol)],colors,markers,marker_sizes)
     plt.savefig('Results/pol_error_opti'+time_end+names_environments[0]+'.pdf',bbox_inches = 'tight')
 
-    plot1D([-12.5,0.5],"Steps","Policy value error","Performance of the agent policy")
+    plot1D([-12.5,0.5],"Steps","Policy value error")
     plot_agents(agents_tested,pol_real,SEM_pol_real,[i*play_parameters["step_between_VI"] for i in range(length_pol)],colors,markers,marker_sizes)
     plt.savefig('Results/pol_error_real'+time_end+names_environments[0]+'.pdf',bbox_inches = 'tight')
+    plt.close()
     
-    plot1D([-1,26],"Trials","Reward","Reward over time")
+    plot1D([-1,26],"Trials","Reward")
     plot_agents(agents_tested,reward,SEM_reward,[i for i in range(play_parameters["trials"])],colors,markers,marker_sizes)
     plt.savefig('Results/Rewards'+time_end+names_environments[0]+'.pdf',bbox_inches = 'tight')
     plt.close()
         
-def plot1D(ylim,xlabel,ylabel,title):
+def plot1D(ylim,xlabel,ylabel):
     fig=plt.figure(dpi=300)
     fig.add_subplot(1, 1, 1)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.title(title)
     plt.grid(linestyle='--')
     plt.ylim(ylim)
 

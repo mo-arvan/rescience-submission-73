@@ -179,7 +179,7 @@ class EBLP(Learning_Progress):
     def compute_reward_VI(self,old_state, reward, action):
         self.bonus[old_state][action]=self.beta/(1+1/np.sqrt(self.LP[old_state][action]))
         self.R_VI[old_state][action]=self.R[old_state][action]+self.bonus[old_state][action]
-
+    
             
 class RmaxLP(Learning_Progress):
 
