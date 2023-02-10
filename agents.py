@@ -157,7 +157,6 @@ class Learning_Progress(basic_Agent):
             new_CV,new_variance=self.cross_validation(self.nSAS[old_state][action][self.nSAS[old_state][action]>0])
             old_CV,old_variance=self.cross_validation(old_array[old_array>0])
             self.LP[old_state][action]=max(old_CV-new_CV+self.alpha*np.sqrt(new_variance),0.001)
-            
 
     def cross_validation(self,array_of_states):
         sum_count=np.sum(array_of_states)

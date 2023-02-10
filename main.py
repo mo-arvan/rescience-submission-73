@@ -4,7 +4,7 @@ from main_Functions import evaluate_agents
 #agents=['R-max','ζ-R-max','BEB','ζ-EB','ε-greedy']
 agents=['R-max','ζ-R-max','BEB','ζ-EB','ε-greedy']
 
-play_parameters={'trials':100, 'max_step':30, 'screen':0,'photos':[1,2,3,10,20,30,40,50,60,70,80,99],'accuracy_VI':0.001,'step_between_VI':50}
+play_parameters={'trials':100, 'max_step':30, 'screen':0,'photos':[1,10,30,50,99],'accuracy_VI':0.001,'step_between_VI':50}
 
 
 ### Environment of Lopes et al. (2012)
@@ -22,7 +22,6 @@ starting_seed=100
 
 
 evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,starting_seed)
-
 
 #Wrong prior
 starting_seed=200
@@ -112,7 +111,7 @@ environments=["Lopes"]
 nb_iters=20
 
 agent_parameters['R-max']={'gamma':0.95, 'm':8,'Rmax':1,'m_uncertain_states':12,'condition':'uninformative'}
-agent_parameters['BEB']={'gamma':0.95,'beta':7,'coeff_prior':0.001,'condition':'uninformative'}
+agent_parameters['BEB']={'gamma':0.95,'beta':4,'coeff_prior':0.001,'condition':'uninformative'}
 
 evaluate_agents(environments,agents,nb_iters,play_parameters,agent_parameters,starting_seed)
 
