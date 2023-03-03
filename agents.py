@@ -1,5 +1,9 @@
 import numpy as np
 
+
+"""Could correct R_VI for BEB and zeta-EB, no initial value for them, maybe I could also do known states/ not known states for 
+R-max and zeta-R-max - to be improved..."""
+
 class basic_Agent:
 
     def __init__(self,environment, gamma=0.95):
@@ -122,7 +126,9 @@ class BEB(basic_Agent):
         else : raise ValueError("The condition "+str(condition)+" does not exist. The conditions are: informative, wrong_prior or uninformative")
         self.prior_0=self.prior.sum(axis=2)
         self.bonus=np.ones((self.size_environment,self.size_actions))*self.beta/(1+self.prior_0)
-        self.Q=np.ones((self.size_environment,self.size_actions))*(1+self.beta)/(1-self.gamma)
+        self.Q=np.ones((self.size_environment,self.size_actions))*(1-self.beta)/(1-self.gamma)
+        #self.Q=np.zeros((self.size_environment,self.size_actions))
+        #self.R_VI=self.R+self.bonus
         
     def compute_reward_VI(self,old_state, reward, action):
         self.prior_0[old_state][action]+=1
@@ -173,7 +179,9 @@ class EBLP(Learning_Progress):
         super().__init__(environment,gamma,step_update,alpha,prior_LP)
         self.beta=beta
         self.bonus=np.ones((self.size_environment,self.size_actions))*self.beta/(1+1/np.sqrt(self.LP))
-        self.Q=np.ones((self.size_environment,self.size_actions))*(1+self.beta)/(1-self.gamma)
+        self.Q=np.ones((self.size_environment,self.size_actions))*(1-self.beta)/(1-self.gamma)
+        #self.Q=np.zeros((self.size_environment,self.size_actions))
+        #self.R_VI=self.R+self.bonus
         
     def compute_reward_VI(self,old_state, reward, action):
         self.bonus[old_state][action]=self.beta/(1+1/np.sqrt(self.LP[old_state][action]))
