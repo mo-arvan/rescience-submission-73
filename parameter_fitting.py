@@ -194,7 +194,7 @@ nb_iters = 20
 
 agent_parameters = {
     'ε-greedy': {'gamma': 0.95, 'epsilon': 0.3},
-    'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_uncertain_states': 12, 'condition': 'informative'},
+    'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
     'BEB': {'gamma': 0.95, 'beta': 7, 'coeff_prior': 2, 'condition': 'informative'},
     'ζ-EB': {'gamma': 0.95, 'beta': 7, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01},
     'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01}}
@@ -204,13 +204,13 @@ agent_name = 'R-max'
 starting_seed = 10000
 
 first_hp = ['m']+[1]+[i for i in range(5, 41, 5)]
-second_hp = ['m_uncertain_states']+[1]+[i for i in range(5, 41, 5)]
+second_hp = ['m_u']+[1]+[i for i in range(5, 41, 5)]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
 
 first_hp = ['m']+[i for i in range(2, 15, 2)]
-second_hp = ['m_uncertain_states']+[i for i in range(2, 21, 2)]
+second_hp = ['m_u']+[i for i in range(2, 21, 2)]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
@@ -307,7 +307,7 @@ nb_iters = 10
 
 agent_parameters = {
     'ε-greedy': {'gamma': 0.95, 'epsilon': 0.3},
-    'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_uncertain_states': 12, 'condition': 'informative'},
+    'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
     'BEB': {'gamma': 0.95, 'beta': 7, 'coeff_prior': 2, 'condition': 'informative'},
     'ζ-EB': {'gamma': 0.95, 'beta': 7, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01},
     'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01}}
@@ -318,7 +318,7 @@ starting_seed = 60000
 
 
 first_hp = ['m']+[1]+[i for i in range(5, 41, 5)]
-second_hp = ['m_uncertain_states']+[1]+[i for i in range(5, 41, 5)]
+second_hp = ['m_u']+[1]+[i for i in range(5, 41, 5)]
 
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
