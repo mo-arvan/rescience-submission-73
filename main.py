@@ -14,7 +14,7 @@ agent_parameters = {
     'ε-greedy': {'gamma': 0.95, 'epsilon': 0.3},
     'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
     'BEB': {'gamma': 0.95, 'beta': 7, 'coeff_prior': 2, 'condition': 'informative'},
-    'ζ-EB': {'gamma': 0.95, 'beta': 5, 'step_update': 10, 'alpha': 2, 'prior_LP': 0.01},
+    'ζ-EB': {'gamma': 0.95, 'beta': 5, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01},
     'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01}}
 
 # Stationary environment
@@ -25,7 +25,7 @@ starting_seed = 100
 
 evaluate_agents(environments, agents, nb_iters, play_parameters, agent_parameters, starting_seed)
 
-"""
+
 # Wrong prior
 starting_seed = 200
 agent_parameters['R-max']['condition'] = 'wrong_prior'
@@ -161,4 +161,3 @@ starting_seed = 2000
 environments = ["Non_stat_strong_-1_{0}".format(world)+'_{0}'.format(non_stat)
                 for world in range(1, 11) for non_stat in range(1, 11)]
 evaluate_agents(environments, agents, nb_iters, play_parameters, agent_parameters, starting_seed)
-"""
