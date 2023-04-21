@@ -1,4 +1,4 @@
-This code tries to replicate the results obtained by Lopes, M., Lang, T., Toussaint, M., & Oudeyer, P. Y. (Neurips 2012).
+This code tries to replicate the results obtained by Lopes, M., Lang, T., Toussaint, M., & Oudeyer, P. Y. (NIPS 2012).
 
 The programs description is listed below : 
 
