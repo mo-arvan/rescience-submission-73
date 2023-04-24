@@ -186,7 +186,7 @@ environments_parameters = loading_environments()
 play_params = {'trials': 100, 'max_step': 30, 'screen': False, 'photos': [
     10, 20, 50, 80, 99], 'accuracy_VI': 0.01, 'step_between_VI': 50}
 
-
+"""
 # Reproduction of Lopes et al. (2012)
 
 environments = ['Lopes']
@@ -231,7 +231,7 @@ fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
 first_hp = ['m']+[round(i*0.1, 1) for i in range(20, 31, 2)]
-second_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5]
+second_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5, 2, 3]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
@@ -299,6 +299,120 @@ second_hp = ['epsilon']+[0.001]+[0.01]+[0.05] + \
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
+"""
+# Parameter fitting for the strong non-stationarity
+
+nb_iters = 5
+environments = ["Non_stat_strong_-0.1_{0}".format(non_stat)for non_stat in range(1, 21)]
+
+agent_parameters = {
+    'ε-greedy': {'gamma': 0.95, 'epsilon': 0.3},
+    'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
+    'BEB': {'gamma': 0.95, 'beta': 7, 'coeff_prior': 2, 'condition': 'informative'},
+    'ζ-EB': {'gamma': 0.95, 'beta': 7, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01},
+    'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01}}
+
+agent_name = 'R-max'
+starting_seed = 110000
+
+first_hp = ['m']+[1]+[i for i in range(5, 41, 5)]
+second_hp = ['m_u']+[1]+[i for i in range(5, 41, 5)]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
+                     {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+
+first_hp = ['m']+[i for i in range(2, 15, 2)]
+second_hp = ['m_u']+[i for i in range(2, 21, 2)]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
+                     {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+
+agent_parameters['R-max']['condition'] = 'uninformative'
+first_hp = ['gamma']+[0.95]
+second_hp = ['m']+[i for i in range(2, 21, 2)]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
+                     {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+
+agent_name = 'ζ-R-max'
+starting_seed = 120000
+
+first_hp = ['m']+[round(i*0.1, 1) for i in range(5, 41, 5)]
+second_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5, 2, 3]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
+                     {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+first_hp = ['m']+[round(i*0.1, 1) for i in range(20, 31, 2)]
+second_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5, 2, 3]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
+                     {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+first_hp = ['gamma']+[0.95]
+second_hp = ['prior_LP']+[10**(i) for i in range(-5, 4)]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
+                     {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+
+agent_name = 'BEB'
+
+
+starting_seed = 130000
+
+first_hp = ['coeff_prior']+[2]
+second_hp = ['beta']+[0.1]+[1]+[2]+[3]+[4]+[i for i in range(5, 26, 5)]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
+                     {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+first_hp = ['beta']+[10]
+second_hp = ['coeff_prior']+[10**i for i in range(-1, 3)]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
+                     {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+
+agent_parameters['BEB']['condition'] = 'uninformative'
+
+first_hp = ['coeff_prior']+[0.001]
+second_hp = ['beta']+[0.1]+[i for i in range(1, 10)]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
+                     {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+starting_seed = 135000
+
+agent_parameters['BEB']['condition'] = 'informative'
+first_hp = ['coeff_prior']+[0.1]+[1]+[3]+[i for i in range(5, 26, 5)]
+second_hp = ['beta']+[0.1]+[1]+[2]+[3]+[4]+[i for i in range(5, 26, 5)]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
+                     {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+agent_name = 'ζ-EB'
+starting_seed = 140000
+
+first_hp = ['beta']+[0.1]+[i for i in range(1, 20, 2)]
+second_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5, 2, 3]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
+                     {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+first_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5, 2, 3]
+second_hp = ['prior_LP']+[10**(i) for i in range(-3, 2)]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp, {
+                     agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+first_hp = ['beta']+[0.1]+[round(0.1*i, 1) for i in range(2, 11, 2)]
+second_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5, 2, 3]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
+                     {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+
+agent_name = 'ε-greedy'
+starting_seed = 150000
+first_hp = ['gamma']+[0.95]
+second_hp = ['epsilon']+[0.001]+[0.01]+[0.05] + \
+    [round(i*0.1, 1) for i in range(1, 4, 1)]+[round(i*0.1, 1) for i in range(5, 11, 2)]
+fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
+                     {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+
+
+"""
 
 # Parameter fitting for the environments with a reward of -1
 
@@ -358,3 +472,4 @@ second_hp = ['epsilon']+[0.001]+[0.01]+[0.05] + \
     [round(i*0.1, 1) for i in range(1, 4, 1)] + [round(i*0.1, 1) for i in range(5, 11, 2)]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
+"""
