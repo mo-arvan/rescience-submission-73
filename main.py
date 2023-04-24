@@ -127,7 +127,7 @@ agent_parameters = {
     'ε-greedy': {'gamma': 0.95, 'epsilon': 0.3},
     'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
     'BEB': {'gamma': 0.95, 'beta': 7, 'coeff_prior': 2, 'condition': 'informative'},
-    'ζ-EB': {'gamma': 0.95, 'beta': 9, 'step_update': 10, 'alpha': 2, 'prior_LP': 0.01},
+    'ζ-EB': {'gamma': 0.95, 'beta': 5, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01},
     'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01}}
 
 

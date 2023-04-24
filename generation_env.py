@@ -22,31 +22,26 @@ def transition_Lopes(alphas=[1, 0.1]):
         reachable_states_bool = np.array([state > 4, state < 20, state % 5 != 0, state % 5 != 4, True])
         result_of_the_action = np.array([-5, +5, -1, 1, 0])
         reachable_states = np.unique(state+reachable_states_bool*result_of_the_action)
-
         for action in range(5):
-
             values = np.random.dirichlet([alpha]*len(reachable_states))
             deterministic_state = state+reachable_states_bool[action]*result_of_the_action[action]
-
             for index_arrival_state, arrival_state in enumerate(reachable_states):
                 transitions[state, action, arrival_state] = values[index_arrival_state]
-
             if transitions[state, action, deterministic_state] != np.max(values):
-                state_max_value = np.argmax(transitions[state, action])
+                state_max = np.argmax(transitions[state, action])
                 tSA = transitions[state, action]
-                tSA[deterministic_state], tSA[state_max_value] = tSA[state_max_value], tSA[deterministic_state]
-
+                tSA[deterministic_state], tSA[state_max] = tSA[state_max], tSA[deterministic_state]
     return transitions
 
 # Non-stationarity in the article
 
 
-states_optimal_path = [0, 5, 15, 16, 17, 18, 19, 14]
+STATES_OPTIMAL_PATH = [0, 5, 15, 16, 17, 18, 19, 14]
 
 
 def non_stat_Lopes_article(transitions, index_state_to_change):
     copy_transitions = np.copy(transitions)
-    changed_state = states_optimal_path[index_state_to_change]
+    changed_state = STATES_OPTIMAL_PATH[index_state_to_change]
 
     derangement_list = np.arange(5)
     while np.any(derangement_list == np.arange(5)):
@@ -60,7 +55,7 @@ def non_stat_Lopes_article(transitions, index_state_to_change):
 
 
 def non_stat_Lopes_all_states(transitions):
-    for index in range(len(states_optimal_path)):
+    for index in range(len(STATES_OPTIMAL_PATH)):
         transitions = non_stat_Lopes_article(transitions, index_state_to_change=index)
     return transitions
 
@@ -129,7 +124,7 @@ def generate_non_stationarity_article(world_number=1, number_of_worlds=1, malus=
                               '_'+str(index_world)+'.npy', allow_pickle=True)
         for non_stat_number in range(1, number_of_worlds+1):
             transitions_non_stationary_article = non_stat_Lopes_article(
-                transitions, np.random.randint(len(states_optimal_path)))
+                transitions, np.random.randint(len(STATES_OPTIMAL_PATH)))
             np.save('Environments/Transitions_non_stat_article'+str(malus)+'_'+str(index_world) +
                     '_'+str(non_stat_number)+'.npy', transitions_non_stationary_article)
 
@@ -173,7 +168,7 @@ np.random.seed(6)
 generate_strong_non_stationarity_(world_number=10, number_of_worlds=10, malus=-1)
 
 
-# Checking how many worlds are valid out of 1000 for each condition
+# Checking how many worlds are valid out of "iteratons" for each condition
 np.random.seed(10)
 proportion_of_valid_worlds(iterations=5000, alphas=[1, 0.1], malus=-0.1, bonus=1)
 proportion_of_valid_worlds(iterations=5000, alphas=[1, 0.1], malus=-1, bonus=1)

@@ -226,12 +226,12 @@ agent_name = 'ζ-R-max'
 starting_seed = 20000
 
 first_hp = ['m']+[round(i*0.1, 1) for i in range(5, 41, 5)]
-second_hp = ['alpha']+[0.1]+[round(i*0.1, 1) for i in range(5, 41, 5)]
+second_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5, 2, 3]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
 first_hp = ['m']+[round(i*0.1, 1) for i in range(20, 31, 2)]
-second_hp = ['alpha']+[round(i*0.1, 1) for i in range(1, 21, 3)]
+second_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
@@ -276,17 +276,17 @@ agent_name = 'ζ-EB'
 starting_seed = 40000
 
 first_hp = ['beta']+[0.1]+[i for i in range(1, 20, 2)]
-second_hp = ['alpha']+[0.1]+[round(0.5*i, 1) for i in range(1, 9)]
+second_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5, 2, 3]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
-first_hp = ['alpha']+[round(0.5*i, 1) for i in range(1, 11)]
+first_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5, 2, 3]
 second_hp = ['prior_LP']+[10**(i) for i in range(-3, 2)]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp, {
                      agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
 first_hp = ['beta']+[0.1]+[round(0.1*i, 1) for i in range(2, 11, 2)]
-second_hp = ['alpha']+[0.1]+[round(0.5*i, 1) for i in range(1, 9)]
+second_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5, 2, 3]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
@@ -329,7 +329,7 @@ starting_seed = 70000
 
 
 first_hp = ['m']+[round(i*0.1, 1) for i in range(5, 41, 5)]
-second_hp = ['alpha']+[0.1]+[round(i*0.1, 1) for i in range(5, 31, 5)]
+second_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5, 2, 3]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
@@ -347,7 +347,7 @@ agent_name = 'ζ-EB'
 starting_seed = 90000
 
 first_hp = ['beta']+[0.1]+[i for i in range(1, 20, 2)]
-second_hp = ['alpha']+[0.1]+[round(0.5*i, 1) for i in range(1, 9)]
+second_hp = ['alpha']+[0.01, 0.05, 0.1, 0.3, 0.5, 1, 1.5, 2, 3]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 

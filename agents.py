@@ -150,7 +150,8 @@ class LearningProgress(BasicAgent):
         self.prior_LP = prior_LP
         self.last_k = np.zeros((self.size_environment, self.size_actions, self.step_update),
                                dtype=np.int32)
-        self.LP = np.ones(self.shape_SA) * 10
+        INITIAL_LP_VALUE = 10
+        self.LP = np.ones(self.shape_SA) * INITIAL_LP_VALUE
 
     def compute_learning_progress(self, old_state, new_state, action):
         self.last_k[old_state][action][self.nSA[old_state][action] % self.step_update] = new_state
@@ -170,7 +171,7 @@ class LearningProgress(BasicAgent):
         estimated_transition_probas = (array_of_state - 1 + self.prior_LP) / (sum_prior-1)
         log_values = np.log(estimated_transition_probas)
         cross_validation = -np.dot(log_values, array_of_state) / sum_count
-        variance_cv = np.dot(array_of_state, (log_values+cross_validation) ** 2) / sum_count
+        variance_cv = np.dot(array_of_state, ((log_values+cross_validation) ** 2)) / sum_count
         return cross_validation, variance_cv
 
 
@@ -180,7 +181,7 @@ class EBLP(LearningProgress):
 
         super().__init__(environment, gamma, step_update, alpha, prior_LP)
         self.beta = beta
-        self.bonus = np.ones(self.shape_SA) * self.beta / (1 + 1 / np.sqrt(self.LP))
+        self.bonus = np.ones(self.shape_SA) * self.beta / (1 + (1 / np.sqrt(self.LP)))
         self.Q = np.ones(self.shape_SA) * (1 + self.beta) / (1 - self.gamma)
         self.R_VI = self.R + self.bonus
 
