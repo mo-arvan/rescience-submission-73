@@ -184,6 +184,7 @@ def save_and_plot(optimal_stats, real_stats, rewards_stats, agents_tested,
     plot1D([-12.5, 0.5], "Steps", "Policy value error")
     plot_agents(agents_tested, pol_real, SEM_pol_real, x_axis, colors, markers, marker_sizes)
     plt.savefig('Results/pol_error_real'+time_end+names_environments[0]+'.pdf', bbox_inches='tight')
+    plt.close()
 
     x_reward = [i for i in range(play_parameters["trials"])]
     plot1D([-1, 26], "Trials", "Reward")

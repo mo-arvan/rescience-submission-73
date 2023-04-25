@@ -14,8 +14,8 @@ agent_parameters = {
     'ε-greedy': {'gamma': 0.95, 'epsilon': 0.3},
     'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
     'BEB': {'gamma': 0.95, 'beta': 7, 'coeff_prior': 2, 'condition': 'informative'},
-    'ζ-EB': {'gamma': 0.95, 'beta': 5, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01},
-    'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01}}
+    'ζ-EB': {'gamma': 0.95, 'beta': 3, 'step_update': 10, 'alpha': 0.3, 'prior_LP': 0.01},
+    'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 0.3, 'prior_LP': 0.01}}
 
 # Stationary environment
 environments = ['Lopes']
@@ -77,7 +77,7 @@ agent_parameters = {
     'ε-greedy': {'gamma': 0.95, 'epsilon': 0.01},
     'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
     'BEB': {'gamma': 0.95, 'beta': 3, 'coeff_prior': 2, 'condition': 'informative'},
-    'ζ-EB': {'gamma': 0.95, 'beta': 1, 'step_update': 10, 'alpha': 1.5, 'prior_LP': 0.01},
+    'ζ-EB': {'gamma': 0.95, 'beta': 1, 'step_update': 10, 'alpha': 0.1, 'prior_LP': 0.01},
     'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01}}
 
 # stationary
@@ -121,14 +121,14 @@ agent_parameters['BEB'] = {'gamma': 0.95, 'beta': 4, 'coeff_prior': 0.001, 'cond
 evaluate_agents(environments, agents, nb_iters, play_parameters, agent_parameters, starting_seed)
 
 
-### Replication with negative reward of -1 ###
+# Replication with negative reward of -1
 
 agent_parameters = {
     'ε-greedy': {'gamma': 0.95, 'epsilon': 0.3},
     'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
     'BEB': {'gamma': 0.95, 'beta': 7, 'coeff_prior': 2, 'condition': 'informative'},
-    'ζ-EB': {'gamma': 0.95, 'beta': 5, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01},
-    'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01}}
+    'ζ-EB': {'gamma': 0.95, 'beta': 3, 'step_update': 10, 'alpha': 0.3, 'prior_LP': 0.01},
+    'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 0.3, 'prior_LP': 0.01}}
 
 
 # Stationary environment
