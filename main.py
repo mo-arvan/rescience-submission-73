@@ -16,7 +16,7 @@ agent_parameters = {
     'BEB': {'gamma': 0.95, 'beta': 7, 'coeff_prior': 2, 'condition': 'informative'},
     'ζ-EB': {'gamma': 0.95, 'beta': 3, 'step_update': 10, 'alpha': 0.3, 'prior_LP': 0.01},
     'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 0.3, 'prior_LP': 0.01}}
-
+"""
 # Stationary environment
 environments = ['Lopes']
 nb_iters = 20
@@ -72,14 +72,14 @@ evaluate_agents(environments, agents, nb_iters, play_parameters, agent_parameter
 
 
 # With the parameters to maximize the real agent policy
-
+"""
 agent_parameters = {
     'ε-greedy': {'gamma': 0.95, 'epsilon': 0.01},
     'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
     'BEB': {'gamma': 0.95, 'beta': 3, 'coeff_prior': 2, 'condition': 'informative'},
     'ζ-EB': {'gamma': 0.95, 'beta': 1, 'step_update': 10, 'alpha': 0.1, 'prior_LP': 0.01},
-    'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01}}
-
+    'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 0.3, 'prior_LP': 0.01}}
+"""
 # stationary
 environments = ["Lopes"]
 nb_iters = 20
@@ -109,18 +109,18 @@ starting_seed = 400
 environments = ["Non_stat_strong_-0.1_{0}".format(non_stat)for non_stat in range(1, 21)]
 
 evaluate_agents(environments, agents, nb_iters, play_parameters, agent_parameters, starting_seed)
-
+"""
 # Without informative prior
 starting_seed = 250
 environments = ["Lopes"]
 nb_iters = 20
 
-agent_parameters['R-max'] = {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'uninformative'}
-agent_parameters['BEB'] = {'gamma': 0.95, 'beta': 4, 'coeff_prior': 0.001, 'condition': 'uninformative'}
+agent_parameters['R-max'] = {'gamma': 0.95, 'm': 10, 'Rmax': 1, 'm_u': 10, 'condition': 'uninformative'}
+agent_parameters['BEB'] = {'gamma': 0.95, 'beta': 3, 'coeff_prior': 0.001, 'condition': 'uninformative'}
 
 evaluate_agents(environments, agents, nb_iters, play_parameters, agent_parameters, starting_seed)
 
-
+"""
 # Replication with negative reward of -1
 
 agent_parameters = {
@@ -161,3 +161,4 @@ starting_seed = 2000
 environments = ["Non_stat_strong_-1_{0}".format(world)+'_{0}'.format(non_stat)
                 for world in range(1, 11) for non_stat in range(1, 11)]
 evaluate_agents(environments, agents, nb_iters, play_parameters, agent_parameters, starting_seed)
+"""
