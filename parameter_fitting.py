@@ -18,6 +18,7 @@ def range_parameters_agent(list1, list2):
 
 
 def get_agent_parameters(name_agent, basic_parameters, list_1, list_2):
+    """Generate all the agent parameters to test during parameter fitting."""
     agent_parameters = []
     list_of_new_parameters = range_parameters_agent(list_1, list_2)
     for dic in list_of_new_parameters:
@@ -28,29 +29,31 @@ def get_agent_parameters(name_agent, basic_parameters, list_1, list_2):
     return agent_parameters
 
 
-def get_mean_and_CI_fitting(dictionary, agent, names_env, nb_iters, first_param, second_param):
+def get_mean_and_SEM_fitting(dictionary, agent, names_env, nb_iters, first_param, second_param):
+    """ Compute the mean and the standard error of the mean for each of the parameter couples."""
     mean = {(agent, p_1, p_2): np.average([dictionary[env, agent, i, p_1, p_2]
                                            for i in range(nb_iters) for env in names_env], axis=0)
             for p_1 in first_param for p_2 in second_param}
-    CI = {(agent, p_1, p_2): np.std([dictionary[env, agent, i, p_1, p_2]
-                                     for env in names_env for i in range(nb_iters)], axis=0)/np.sqrt(nb_iters*len(names_env))
-          for p_1 in first_param for p_2 in second_param}
-    return mean, CI
+    SEM = {(agent, p_1, p_2): (np.std([dictionary[env, agent, i, p_1, p_2]
+                                       for env in names_env for i in range(nb_iters)], axis=0)
+                               / np.sqrt(nb_iters*len(names_env)))
+           for p_1 in first_param for p_2 in second_param}
+    return mean, SEM
 
 
 def extracting_results(opti_pol_error, real_pol_error, agents_tested, names_env,
                        nb_iters, first_param, second_param):
-    mean_pol_opti, CI_pol_opti = get_mean_and_CI_fitting(
+    """Apply get_mean_and_SEM_fitting to the measures of policy value error (real and optimal)."""
+    mean_pol_opti, SEM_pol_opti = get_mean_and_SEM_fitting(
         opti_pol_error, names_env, agents_tested, nb_iters, first_param, second_param)
-    mean_pol_real, CI_pol_real = get_mean_and_CI_fitting(
+    mean_pol_real, SEM_pol_real = get_mean_and_SEM_fitting(
         real_pol_error, names_env, agents_tested, nb_iters, first_param, second_param)
-    return mean_pol_opti, CI_pol_opti, mean_pol_real, CI_pol_real
+    return mean_pol_opti, SEM_pol_opti, mean_pol_real, SEM_pol_real
 
 
 def get_best_performance(pol_error, name_agent, first_param, second_param, range_of_the_mean):
-    avg_pol_error = {(name_agent, hp_1, hp_2): np.average(
-        pol_error_value[-range_of_the_mean:])
-        for (name_agent, hp_1, hp_2), pol_error_value in pol_error.items()}
+    avg_pol_error = {(name_agent, hp_1, hp_2): np.average(pol_error_value[-range_of_the_mean:])
+                     for (name_agent, hp_1, hp_2), pol_error_value in pol_error.items()}
 
     array_result = np.zeros((len(first_param)-1, len(second_param)-1))
     for index_hp_1, hp_1 in enumerate(first_param[1:]):
@@ -59,40 +62,41 @@ def get_best_performance(pol_error, name_agent, first_param, second_param, range
     return array_result
 
 
-def save_results_parametter_fitting(pol_opti, CI_pol_opti, pol_real, CI_pol_real,
-                                    name_agent, first_param, second_param,
-                                    play_parameters, name_environments):
+def save_results_parameter_fitting(pol_opti, SEM_pol_opti, pol_real, SEM_pol_real,
+                                   name_agent, first_param, second_param,
+                                   play_parameters, name_environments):
+    """Save all the results of the parameter fitting in a '.npy' format."""
     time_end = str(round(time.time() % 1e7))
     np.save('Parameter fitting/Data/'+name_agent+'_' +
             name_environments[0]+'_pol_opti_'+time_end+'.npy', pol_opti)
     np.save('Parameter fitting/Data/'+name_agent+'_' +
-            name_environments[0]+'_CI_pol_opti_'+time_end+'.npy', CI_pol_opti)
+            name_environments[0]+'_SEM_pol_opti_'+time_end+'.npy', SEM_pol_opti)
     np.save('Parameter fitting/Data/'+name_agent+'_' +
             name_environments[0]+'_pol_real_'+time_end+'.npy', pol_real)
     np.save('Parameter fitting/Data/'+name_agent+'_' +
-            name_environments[0]+'_CI_pol_real_'+time_end+'.npy', CI_pol_real)
+            name_environments[0]+'_SEM_pol_real_'+time_end+'.npy', SEM_pol_real)
     return time_end
 
 
 def plot_from_saved(name_agent, first_param, second_param,
                     step_between_VI, name_environments, time_end, optimal):
     if optimal:
-        pol = np.load('Parameter fitting/Data/'+name_agent+'_' +
-                      name_environments[0]+'_pol_opti_'+time_end+'.npy', allow_pickle=True)[()]
-        CI_pol = np.load('Parameter fitting/Data/'+name_agent+'_' +
-                         name_environments[0]+'_CI_pol_opti_'+time_end+'.npy', allow_pickle=True)[()]
+        pol = np.load('Parameter fitting/Data/'+name_agent+'_' + name_environments[0] +
+                      '_pol_opti_'+time_end+'.npy', allow_pickle=True)[()]
+        SEM_pol = np.load('Parameter fitting/Data/'+name_agent+'_' + name_environments[0] +
+                          '_SEM_pol_opti_'+time_end+'.npy', allow_pickle=True)[()]
     else:
-        pol = np.load('Parameter fitting/Data/'+name_agent+'_' +
-                      name_environments[0]+'_pol_real_'+time_end+'.npy', allow_pickle=True)[()]
-        CI_pol = np.load('Parameter fitting/Data/'+name_agent+'_' +
-                         name_environments[0]+'_CI_pol_real_'+time_end+'.npy', allow_pickle=True)[()]
-    plot_parameter_fitting(pol, CI_pol, name_agent, first_param,
+        pol = np.load('Parameter fitting/Data/'+name_agent+'_' + name_environments[0] +
+                      '_pol_real_'+time_end+'.npy', allow_pickle=True)[()]
+        SEM_pol = np.load('Parameter fitting/Data/'+name_agent+'_' + name_environments[0] +
+                          '_SEM_pol_real_'+time_end+'.npy', allow_pickle=True)[()]
+    plot_parameter_fitting(pol, SEM_pol, name_agent, first_param,
                            second_param, step_between_VI, name_environments, time_end, optimal)
 
 
-def plot_parameter_fitting(pol, CI_pol, name_agent, first_param, second_param,
+def plot_parameter_fitting(pol, SEM_pol, name_agent, first_param, second_param,
                            step_between_VI, name_environments, time_end, optimal):
-
+    """Plot 1D curves for parameter fitting."""
     markers = ['^', 'o', 'x', '*', 's']
     colors = ['#9d02d7', '#0000ff', "#ff7763", "#ffac1e", "#009435"]
     array_avg_pol_last_500 = get_best_performance(
@@ -113,8 +117,8 @@ def plot_parameter_fitting(pol, CI_pol, name_agent, first_param, second_param,
     for hp_1 in first_param[1:]:
         plot1D(ylim=[-12.5, 0.5], xlabel="Steps", ylabel="Policy value error")
         for hp_2 in second_param[1:]:
-            yerr0 = pol[name_agent, hp_1, hp_2] - CI_pol[name_agent, hp_1, hp_2]
-            yerr1 = pol[name_agent, hp_1, hp_2] + CI_pol[name_agent, hp_1, hp_2]
+            yerr0 = pol[name_agent, hp_1, hp_2] - SEM_pol[name_agent, hp_1, hp_2]
+            yerr1 = pol[name_agent, hp_1, hp_2] + SEM_pol[name_agent, hp_1, hp_2]
 
             plt.fill_between([step_between_VI*i for i in range(len(pol[name_agent, hp_1, hp_2]))],
                              yerr0, yerr1, color=colors[curve_number], alpha=0.2)
@@ -126,7 +130,8 @@ def plot_parameter_fitting(pol, CI_pol, name_agent, first_param, second_param,
             if curve_number == 5 or hp_2 == second_param[-1]:
                 plt.legend()
                 if optimal:
-                    plt.title(name_agent+" optimal policy with " + str(first_param[0])+" = "+str(hp_1))
+                    plt.title(name_agent+" optimal policy with " +
+                              str(first_param[0])+" = "+str(hp_1))
                     plt.savefig('Parameter fitting/1DPlots/pol_error_opti_' + name_agent + '_' +
                                 name_environments[0] + str(hp_2)+"_"
                                 + str(time.time())+'.pdf', bbox_inches='tight')
@@ -143,14 +148,13 @@ def plot_parameter_fitting(pol, CI_pol, name_agent, first_param, second_param,
 
 
 def plot_2D(array_result, first_param, second_param):
+    """Provide a template for 2D heatmaps."""
     fig = plt.figure(dpi=300)
     fig.add_subplot(1, 1, 1)
-    # rdgn = sns.diverging_palette(h_neg=130, h_pos=10, s=99, l=55, sep=3, as_cmap=True)
     divnorm = TwoSlopeNorm(vmin=-12, vcenter=-1, vmax=0)
     font_size = 35 / (np.sqrt(len(array_result))+2.5)
     sns.heatmap(array_result, cmap='bwr', norm=divnorm, cbar=True, annot=np.round(array_result, 1),
                 cbar_kws={"ticks": [-12, -1, 0]}, annot_kws={"size": font_size})
-    # linewidths=0.05, linecolor='black'
     plt.xlabel(second_param[0])
     plt.ylabel(first_param[0])
     plt.xticks([i+0.5 for i in range(len(second_param[1:]))], second_param[1:])
@@ -168,19 +172,18 @@ def fit_parameters_agent(environments, name_agent, nb_iters, first_hp, second_hp
                                                                first_hp, second_hp)
     opti_pol_errors, real_pol_errors, reward_pol_errors = main_function(
         seeds_agent, every_simulation, play_parameters, agent_parameters)
-    mean_pol_opti, CI_pol_opti, mean_pol_real, CI_pol_real = extracting_results(
+    mean_pol_opti, SEM_pol_opti, mean_pol_real, SEM_pol_real = extracting_results(
         opti_pol_errors, real_pol_errors, environments,
         name_agent, nb_iters, first_hp[1:], second_hp[1:])
-    time_end = save_results_parametter_fitting(
-        mean_pol_opti, CI_pol_opti, mean_pol_real, CI_pol_real, name_agent,
+    time_end = save_results_parameter_fitting(
+        mean_pol_opti, SEM_pol_opti, mean_pol_real, SEM_pol_real, name_agent,
         first_hp, second_hp, play_parameters, environments)
     for optimal in [False, True]:
         plot_from_saved(name_agent, first_hp, second_hp,
                         play_parameters["step_between_VI"], environments, time_end, optimal)
 
 
-# Parameter fitting for each agent #
-
+# Parameter fitting for each agent
 
 environments_parameters = loading_environments()
 play_params = {'trials': 100, 'max_step': 30, 'screen': False, 'photos': [
@@ -196,8 +199,8 @@ agent_parameters = {
     'ε-greedy': {'gamma': 0.95, 'epsilon': 0.3},
     'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
     'BEB': {'gamma': 0.95, 'beta': 7, 'coeff_prior': 2, 'condition': 'informative'},
-    'ζ-EB': {'gamma': 0.95, 'beta': 7, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01},
-    'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01}}
+    'ζ-EB': {'gamma': 0.95, 'beta': 3, 'step_update': 10, 'alpha': 0.3, 'prior_LP': 0.01},
+    'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 0.3, 'prior_LP': 0.01}}
 
 
 agent_name = 'R-max'
@@ -215,7 +218,7 @@ fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
 
-agent_parameters['R-max']['condition'] = 'uninformative'
+agent_parameters['R-max']['condition'] = 'uniform'
 first_hp = ['gamma']+[0.95]
 second_hp = ['m']+[i for i in range(2, 21, 2)]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
@@ -242,8 +245,6 @@ fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
 
 
 agent_name = 'BEB'
-
-
 starting_seed = 30000
 
 first_hp = ['coeff_prior']+[2]
@@ -257,7 +258,7 @@ fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
 
-agent_parameters['BEB']['condition'] = 'uninformative'
+agent_parameters['BEB']['condition'] = 'uniform'
 
 first_hp = ['coeff_prior']+[0.001]
 second_hp = ['beta']+[0.1]+[i for i in range(1, 10)]
@@ -293,6 +294,7 @@ fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
 
 agent_name = 'ε-greedy'
 starting_seed = 50000
+
 first_hp = ['gamma']+[0.95]
 second_hp = ['epsilon']+[0.001]+[0.01]+[0.05] + \
     [round(i*0.1, 1) for i in range(1, 4, 1)]+[round(i*0.1, 1) for i in range(5, 11, 2)]
@@ -300,17 +302,17 @@ fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
 
-# Parameter fitting for the environments with a reward of -1
+# Parameter fitting for the environments with a malus of -1
 
-environments = ['Stationary_Lopes_-1_'+str(number_world) for number_world in range(1, 11)]
+environments = ['Stationary_-1_'+str(number_world) for number_world in range(1, 11)]
 nb_iters = 10
 
 agent_parameters = {
     'ε-greedy': {'gamma': 0.95, 'epsilon': 0.3},
     'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
     'BEB': {'gamma': 0.95, 'beta': 7, 'coeff_prior': 2, 'condition': 'informative'},
-    'ζ-EB': {'gamma': 0.95, 'beta': 7, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01},
-    'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 1, 'prior_LP': 0.01}}
+    'ζ-EB': {'gamma': 0.95, 'beta': 3, 'step_update': 10, 'alpha': 0.3, 'prior_LP': 0.01},
+    'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 0.3, 'prior_LP': 0.01}}
 
 
 agent_name = 'R-max'

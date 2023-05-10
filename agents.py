@@ -1,3 +1,4 @@
+"""Contains the five agents compared in Lopes and colleagues' article."""
 import numpy as np
 
 
@@ -49,7 +50,7 @@ class BasicAgent:
 
     def value_iteration(self):
         # visited = np.where(self.nSA >= 0, 1, 0)  # computes Q-values for all (state,action)
-        visited = np.where(self.nSA >= 1, 1, 0)  # computes Q-values only for visited (state,action)
+        visited = np.where(self.nSA >= 1, 1, 0)  # computes Q-values for visited (state,action)
         threshold = 1e-3
         converged = False
         while not converged:
@@ -95,11 +96,11 @@ class Rmax(BasicAgent):
                 self.max_visits[state] = np.ones(self.size_actions)*self.m_u
         elif condition == 'wrong_prior':
             self.max_visits = np.random.randint(self.m, self.m_u, (self.shape_SA))
-        elif condition == 'uninformative':
+        elif condition == 'uniform':
             self.max_visits = np.ones(self.shape_SA)*self.m
         else:
             raise ValueError("The condition " + str(condition) + " does not exist."
-                             " The conditions are: informative, wrong_prior or uninformative.")
+                             " The conditions are: informative, wrong_prior or uniform.")
 
     def compute_reward_VI(self, old_state, reward, action):
         if self.nSA[old_state][action] >= self.max_visits[old_state][action]:
@@ -118,14 +119,14 @@ class BEB(BasicAgent):
 
         if condition == 'informative':
             self.prior = self.environment.transitions * self.coeff_prior + 1e-5
-        elif condition == 'uninformative':
+        elif condition == 'uniform':
             self.prior = np.ones(self.shape_SAS) * self.coeff_prior
         elif condition == 'wrong_prior':
             max_prior = np.max(self.environment.transitions * self.coeff_prior + 1e-5)
             self.prior = np.random.uniform(1e-5, max_prior, (self.shape_SAS))
         else:
             raise ValueError("The condition "+str(condition)+" does not exist."
-                             " The conditions are: informative, wrong_prior or uninformative")
+                             "The conditions are: 'informative', 'wrong_prior' or 'uniform'")
         self.prior_0 = self.prior.sum(axis=2)
         self.bonus = np.ones(self.shape_SA) * self.beta / (1 + self.prior_0)
         self.Q = np.ones(self.shape_SA) * (1 + self.beta) / (1 - self.gamma)

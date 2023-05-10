@@ -1,16 +1,16 @@
+"""Contains the environment used in Lopes and colleagues' article."""
 import numpy as np
 
 
-UP, DOWN, LEFT, RIGHT, STAY = 0, 1, 2, 3, 4
+# UP, DOWN, LEFT, RIGHT, STAY = 0, 1, 2, 3, 4
 
 
-class Lopes_environment():
-
+class Lopes_environment:
     def __init__(self, transitions, rewards, transitions_after_change=[]):
         self.first_location = 0
         self.current_location = 0
 
-        self.actions = [UP, DOWN, LEFT, RIGHT, STAY]
+        self.actions = np.arange(5)
         self.transitions = transitions
         self.transitions_after_change = transitions_after_change
         self.rewards = rewards
