@@ -59,7 +59,7 @@ def loading_environments():
             env_param["Non_stat_article_-1_{0}".format(nb_env)+'_{0}'.format(index_non_stat)] = {
                 'transitions': transitions_0_1, 'rewards': malus_1,
                 'transitions_after_change': transitions_non_stat_article}
-            env_param["Non_stat_strong_-1_{0}".format(nb_env)+'_{0}'.format(index_non_stat)] = {
+            env_param["Strong_non_stat_-1_{0}".format(nb_env)+'_{0}'.format(index_non_stat)] = {
                 'transitions': transitions_0_1, 'rewards': malus_1,
                 'transitions_after_change': transitions_strong_non_stat}
 

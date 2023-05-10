@@ -252,8 +252,10 @@ second_hp = ['beta']+[0.1]+[1]+[2]+[3]+[4]+[i for i in range(5, 26, 5)]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
+
+starting_seed = 31000
 first_hp = ['beta']+[10]
-second_hp = ['coeff_prior']+[10**i for i in range(-1, 3)]
+second_hp = ['coeff_prior']+[10**i for i in range(-1, 4)]
 fit_parameters_agent(environments, agent_name, nb_iters, first_hp, second_hp,
                      {agent_name: agent_parameters[agent_name]}, starting_seed, play_params)
 
