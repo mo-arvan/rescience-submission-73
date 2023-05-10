@@ -1,3 +1,4 @@
+"""Generate the heatmaps and the 1D plots for the parameter fitting."""
 import numpy as np
 import time
 from main_functions import loading_environments, getting_simulations_to_do, main_function, plot1D

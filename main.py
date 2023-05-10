@@ -12,16 +12,16 @@ play_parameters = {'trials': 100, 'max_step': 30, 'screen': False,
 # Environment of Lopes et al. (2012)
 
 agent_param_opt = {
-    'ε-greedy': {'gamma': 0.95, 'epsilon': 0.2},
+    'ε-greedy': {'gamma': 0.95, 'epsilon': 0.3},
     'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
     'BEB': {'gamma': 0.95, 'beta': 7, 'coeff_prior': 2, 'condition': 'informative'},
-    'ζ-EB': {'gamma': 0.95, 'beta': 5, 'step_update': 10, 'alpha': 0.1, 'prior_LP': 0.01},
+    'ζ-EB': {'gamma': 0.95, 'beta': 3, 'step_update': 10, 'alpha': 0.1, 'prior_LP': 0.01},
     'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 0.3, 'prior_LP': 0.01}}
 
 # Stationary environment
 environments = ['Lopes']
 nb_iters = 20
-"""starting_seed = 100
+starting_seed = 100
 
 evaluate_agents(environments, agents, nb_iters, play_parameters, agent_param_opt, starting_seed)
 
@@ -33,7 +33,7 @@ agent_param_opt['BEB']['condition'] = 'wrong_prior'
 evaluate_agents(environments, agents, nb_iters, play_parameters, agent_param_opt, starting_seed)
 
 agent_param_opt['R-max']['condition'] = 'informative'
-agent_param_opt['BEB']['condition'] = 'informative'"""
+agent_param_opt['BEB']['condition'] = 'informative'
 
 # Non-stationarity from the article
 starting_seed = 300
@@ -98,13 +98,13 @@ nb_iters = 5
 agent_param_real['R-max']['condition'] = 'informative'
 agent_param_real['BEB']['condition'] = 'informative'
 
-environments = ["Non_stat_article_-0.1_{0}".format(non_stat)for non_stat in range(1, 21)]
+environments = ["Lopes_non_stat_article_{0}".format(ind_non_stat)for ind_non_stat in range(1, 21)]
 
 evaluate_agents(environments, agents, nb_iters, play_parameters, agent_param_real, starting_seed)
 
 # Stronger non-stationarity to find the same third figure as Lopes et al. (2012)
 starting_seed = 400
-environments = ["Non_stat_strong_-0.1_{0}".format(non_stat)for non_stat in range(1, 21)]
+environments = ["Lopes_strong_non_stat_{0}".format(ind_non_stat) for ind_non_stat in range(1, 21)]
 
 evaluate_agents(environments, agents, nb_iters, play_parameters, agent_param_real, starting_seed)
 
@@ -122,10 +122,10 @@ evaluate_agents(environments, agents, nb_iters, play_parameters, agent_param_rea
 # Replication with negative reward of -1
 
 agent_param_opt = {
-    'ε-greedy': {'gamma': 0.95, 'epsilon': 0.2},
+    'ε-greedy': {'gamma': 0.95, 'epsilon': 0.3},
     'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
     'BEB': {'gamma': 0.95, 'beta': 7, 'coeff_prior': 2, 'condition': 'informative'},
-    'ζ-EB': {'gamma': 0.95, 'beta': 5, 'step_update': 10, 'alpha': 0.1, 'prior_LP': 0.01},
+    'ζ-EB': {'gamma': 0.95, 'beta': 3, 'step_update': 10, 'alpha': 0.1, 'prior_LP': 0.01},
     'ζ-R-max': {'gamma': 0.95, 'Rmax': 1, 'm': 2, 'step_update': 10, 'alpha': 0.3, 'prior_LP': 0.01}}
 
 
