@@ -17,16 +17,16 @@ Lopes, M., Lang, T., Toussaint, M., & Oudeyer, P. Y. (2012). Exploration in mode
 * The folder **Images** contains 2D heatmaps on the different environments
 * The folder **Parameter fitting** contains the plots and the data generated with `parameter_fitting.py`
 * The folder **Results** contains the plots and the data generated with `main.py`
-* You can read the article or the metadata using `article.pdf` and `metadata.yaml`. 
+* You can read the article or the metadata using `article.pdf` and `metadata.yaml`
 
 ## Installation 
 
 To clone this repository, use `git clone https://github.com/AugustinChrtn/Reproduction/`
 Then, install the requiremed libraries indicated in the `requirements.txt` file.
 
-Once these two steps are done, you can:
-* (Optional) Launch `generation_env.py` to generate the environments.
-* (Optional) Launch `parameter_fitting.py` to get the parameter fitting data and plots on these environments.
+After these two steps, you can:
+* Launch `generation_env.py` to generate the environments.
+* Launch `parameter_fitting.py` to get the parameter fitting data and plots on these environments.
 * Launch `main.py` to get the figures and the data for the article replication.
 
 
