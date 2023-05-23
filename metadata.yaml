@@ -49,7 +49,7 @@ keywords: Intrinsic motivation, Model-based reinforcement learning, Python
 # You can get a DOI for your code from Zenodo,
 #   see https://guides.github.com/activities/citable-code/
 code:
-  - url: https://github.com/rescience-c/template
+  - url:
   - doi: 
 
 # Date URL and DOI (optional if no data)
@@ -59,7 +59,7 @@ data:
 
 # Information about the original article that has been replicated
 replication:
- - cite: # Full textual citation
+ - cite: Lopes, M., Lang, T., Toussaint, M., & Oudeyer, P. Y. (2012). Exploration in model-based reinforcement learning by empirically estimating learning progress. Advances in neural information processing systems, 25.  #APA format
  - bib:  @inproceedings{lopes2012,
  author = {Lopes, Manuel and Lang, Tobias and Toussaint, Marc and Oudeyer, Pierre-yves},
  booktitle = {Advances in Neural Information Processing Systems},
@@ -72,7 +72,7 @@ replication:
  year = {2012}
 }
  - url:  https://proceedings.neurips.cc/paper/2012/file/a0a080f42e6f13b3a2df133f073095dd-Paper.pdf
- - doi:  # Regular digital object identifier
+ - doi:  None # Regular digital object identifier
 
 # Don't forget to surround abstract with double quotes
 abstract: "The goal of a model-based reinforcement learning agent is to maximize external returns by understanding the structure of the environment it explores. However, simple reinforcement learning agents may struggle with tasks where external rewards are scarce. Taking inspiration from developmental sciences which show that infants spontaneously explore their environment in the absence of extrinsic rewards, intrinsically motivated reinforcement learning investigates how agents can explore their environments with little extrinsic motivation. In 2012, Lopes and colleagues proposed two new intrinsically motivated models in model-based reinforcement learning \cite{lopes2012}. Building upon two optimistic-in-the-face-of-uncertainty agents, they demonstrate theoretical convergence properties for one of their agents, and provide three experiments to show that their models are more versatile than state-of-the-art models. However, due to missing information in their protocol, we only managed to partially reproduce the results of the original article. In our reproduction article, we show the results obtained for several alternative ways to interpret the text of the original article, and discuss what this implies in terms of performance of the different agents. For each tested variant, we performed parameter optimization in order to give the best chances to replicate the figures of the original article."
