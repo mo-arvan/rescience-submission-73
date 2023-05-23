@@ -13,10 +13,11 @@ Lopes, M., Lang, T., Toussaint, M., & Oudeyer, P. Y. (2012). Exploration in mode
 * To launch the experiment and get all the result figures, launch `main.py`
 * To get all the parameter fitting figures, launch `parameter_fitting.py`
 * To install the libraries, use `requirements.txt`
-* The folder *Environments* contains the transitions and the rewards of the environments generated
-* The folder *Images* contains 2D heatmaps on the different environments
-* The folder *Parameter fitting* contains the plots and the data generated with `parameter_fitting.py`
-* The folder *Results* contains the plots and the data generated with `main.py`
+* The folder **Environments** contains the transitions and the rewards of the environments generated
+* The folder **Images** contains 2D heatmaps on the different environments
+* The folder **Parameter fitting** contains the plots and the data generated with `parameter_fitting.py`
+* The folder **Results** contains the plots and the data generated with `main.py`
+* To read the article, open *article.pdf* and open *metadata.yaml* for the metadata.
 
 ## Installation 
 
