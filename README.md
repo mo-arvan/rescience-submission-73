@@ -1,14 +1,35 @@
-This code tries to replicate the results obtained by Lopes, M., Lang, T., Toussaint, M., & Oudeyer, P. Y. (NIPS 2012).
+This code attempts to replicate the results from
 
-The programs description is listed below : 
+Lopes, M., Lang, T., Toussaint, M., & Oudeyer, P. Y. (2012). Exploration in model-based reinforcement learning by empirically estimating learning progress. Advances in neural information processing systems, 25. Lopes, M., Lang, T., Toussaint, M., & Oudeyer, P. Y. (NIPS 2012).
 
-* to install the libraries, use requirements.txt
-* to generate all the environments, launch generation_env.py 
-* to do the parameter fitting, launch parameter_fitting.py
-* to get the main results of the article, launch main.py
-* the agents are in agents.py, the policy evaluation functions are in policy\_Functions.py, the environment is in Lopesworld.py, the important functions (such as the play function) are in main\_Functions.py 
+## Description
 
-In the folder environments, you can find all the transitions and rewards of the environments used in a .npy format. In the folder Images, you can find 2D plots of the agents performance in one environment or of the optimal value iteration in each environment. In the folder Parameter fitting, you can find the Data, the 1D plots and the heatmaps which helped us fit the parameters of the agents. In Results you can check the results that you get when you launch the main function.
+
+* The five agent classes are in 'agents.py'
+* The environment class is in 'lopesworld.py'
+* The policy evaluation functions are in 'policy_functions.py'
+* The play function and the visualisation functions are in 'main_functions.py'
+* The generation process of the environments, as well as their generation is in 'generation_env.py'
+* To launch the experiment and get all the result figures, launch 'main.py'
+* To get all the parameter fitting figures, launch 'parameter_fitting.py'
+* To install the libraries, use 'requirements.txt'
+* The folder *Environments* contains the transitions and the rewards of the environments generated
+* The folder *Images* contains 2D heatmaps on the different environments
+* The folder *Parameter fitting* contains the plots and the data generated with 'parameter_fitting.py'
+* The folder *Results* contains the plots and the data generated with 'main.py'
+
+## Installation 
+
+To clone this repository, use 'git clone https://github.com/AugustinChrtn/Reproduction/'.
+Then, install the requiremed libraries indicated in the 'requirement.txt' file.
+
+Once these two steps are done, you can:
+* (Optional) Launch 'generation_env.py' to generate the environments.
+* (Optional) Launch 'parameter_fitting.py' to get the parameter fitting data and plots on these environments.
+* Launch 'main.py' to get the figures and the data for the article replication.
+
+
+
 
 
 
