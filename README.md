@@ -17,7 +17,7 @@ Lopes, M., Lang, T., Toussaint, M., & Oudeyer, P. Y. (2012). Exploration in mode
 * The folder **Images** contains 2D heatmaps on the different environments
 * The folder **Parameter fitting** contains the plots and the data generated with `parameter_fitting.py`
 * The folder **Results** contains the plots and the data generated with `main.py`
-* To read the article, open *article.pdf* and open *metadata.yaml* for the metadata.
+* You can read the article or the metadata using `article.pdf` and `metadata.yaml`. 
 
 ## Installation 
 
