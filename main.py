@@ -3,14 +3,16 @@ from main_functions import evaluate_agents
 
 
 # agents=['R-max','ζ-R-max','BEB','ζ-EB','ε-greedy']
-agents = ['R-max', 'ζ-R-max', 'BEB', 'ζ-EB', 'ε-greedy']
+agents = ['R-max', 'ζ-R-max', 'BEB', 'ζ-EB', 'ε-greedy']  # All the agents to plot
 
+# Parameters to use for the play function
 play_parameters = {'trials': 100, 'max_step': 30, 'screen': False,
-                   'photos': [1, 10, 20, 50, 99], 'accuracy_VI': 0.001, 'step_between_VI': 50}
+                   'photos': [], 'accuracy_VI': 0.001, 'step_between_VI': 50}
 
 
 # Environment of Lopes et al. (2012)
 
+# Parameters found using parameter fitting for Lopes et al.'s metrics
 agent_param_opt = {
     'ε-greedy': {'gamma': 0.95, 'epsilon': 0.3},
     'R-max': {'gamma': 0.95, 'm': 8, 'Rmax': 1, 'm_u': 12, 'condition': 'informative'},
@@ -68,7 +70,7 @@ agent_param_opt['BEB'] = {'gamma': 0.95, 'beta': 7, 'coeff_prior': 0.001, 'condi
 evaluate_agents(environments, agents, nb_iters, play_parameters, agent_param_opt, starting_seed)
 
 
-# With the parameters to maximize the real agent policy
+# With the agent parameters to maximize the real agent policy
 
 agent_param_real = {
     'ε-greedy': {'gamma': 0.95, 'epsilon': 0.01},
