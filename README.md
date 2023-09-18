@@ -27,8 +27,8 @@ Then, install the required libraries indicated in the `requirements.txt` file.
 
 After these two steps, you can:
 * Launch `generation_env.py` to generate the environments.
-* Launch `parameter_fitting.py` to get the parameter fitting data and plots on these environments.
 * Launch `main.py` to get the figures and the data for the article replication.
+* Launch `parameter_fitting.py` to get the parameter fitting data and plots on these environments.
 
 
 
