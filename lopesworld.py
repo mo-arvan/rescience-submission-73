@@ -23,11 +23,12 @@ class Lopes_environment:
     def make_step(self, action):
         self.total_steps += 1
 
-        if self.transitions_after_change != [] and self.total_steps == 900:
+        if len(self.transitions_after_change) != 0 and self.total_steps == 900:  # non-stationarity
             total_steps = self.total_steps
             self.__init__(self.transitions_after_change, self.rewards)
             self.changed = True
             self.total_steps = total_steps
+
         probabilities = self.transitions[self.current_location][action]
         self.current_location = np.random.choice(np.arange(25), size=1, p=probabilities)[0]
 
