@@ -260,6 +260,7 @@ def save_and_plot(optimal_stats, real_stats, rewards_stats, agents_tested,
     plot1D([-1, 26], "Trials", "Reward")
     plot_agents(agents_tested, reward, SEM_reward, x_reward, colors, markers, marker_sizes)
     plt.savefig('Results/Rewards'+time_end+names_environments[0]+'.pdf', bbox_inches='tight')
+    print('Saved the new plots in the Results folder')
     plt.close()
 
 
