@@ -1,0 +1,62 @@
+~/Workspace/rescience-submission-73$ docker run --rm -v ${PWD}:/workspace -it re_76  bash
+root@02638abe130a:/# cd /workspace/
+root@02638abe130a:/workspace# ls
+ Environments  'Parameter fitting'   Results     article.pdf   generation_env.py   main.py             metadata.yaml          policy_functions.py
+ Images         README.md            agents.py   artifact      lopesworld.py       main_functions.py   parameter_fitting.py   requirements.txt
+root@02638abe130a:/workspace# python generation_env.py
+
+Percentage of valid worlds out of 5000 worlds, with a malus of -0.1: 1.7%
+
+Percentage of valid worlds out of 5000 worlds, with a malus of -1: 24.7%
+root@02638abe130a:/workspace# 
+root@02638abe130a:/workspace# python main.py
+Computation time: 9.709866762161255
+Saved the new plots in the Results folder
+Computation time: 11.79325532913208
+Saved the new plots in the Results folder
+Computation time: 55.74695086479187
+Saved the new plots in the Results folder
+Computation time: 57.52557063102722
+Saved the new plots in the Results folder
+Computation time: 99.65394425392151
+Saved the new plots in the Results folder
+Computation time: 9.870355606079102
+Saved the new plots in the Results folder
+Computation time: 8.81637954711914
+Saved the new plots in the Results folder
+Computation time: 11.679914712905884
+Saved the new plots in the Results folder
+Computation time: 50.78882360458374
+Saved the new plots in the Results folder
+Computation time: 53.1058611869812
+Saved the new plots in the Results folder
+Computation time: 9.183977365493774
+Saved the new plots in the Results folder
+Computation time: 52.83103585243225
+Saved the new plots in the Results folder
+Computation time: 63.83023428916931
+Saved the new plots in the Results folder
+Computation time: 54.96837282180786
+Saved the new plots in the Results folder
+Computation time: 56.364516496658325
+Saved the new plots in the Results folder
+root@02638abe130a:/workspace# python parameter_fitting.py
+Computation time: 86.85009479522705
+Computation time: 79.69500637054443
+Computation time: 11.746623754501343
+Computation time: 95.50658702850342
+Computation time: 73.73780870437622
+Computation time: 12.536908864974976
+Computation time: 23.07150959968567
+Computation time: 10.775141716003418
+Computation time: 22.25046157836914
+Computation time: 159.41191148757935
+Computation time: 310.3452217578888
+Computation time: 108.89136171340942
+Computation time: 88.0088701248169
+Computation time: 10.744967222213745
+Computation time: 441.7260789871216
+Computation time: 482.99915838241577
+Computation time: 123.76939821243286
+Computation time: 1451.9199368953705
+Computation time: 51.981823205947876

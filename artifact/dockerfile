@@ -1,0 +1,14 @@
+FROM python:3.9.13-buster
+
+
+COPY requirements.txt /docker_build/
+
+
+RUN pip install --upgrade pip && \
+    pip install -r /docker_build/requirements.txt
+
+
+
+
+# change dir to /workspace
+
